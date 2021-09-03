@@ -3,48 +3,9 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
-# [2.35.0](https://github.com/aws-amplify/amplify-cli/compare/amplify-category-function@2.34.7...amplify-category-function@2.35.0) (2021-09-27)
-
-
-### Features
-
-* Flag to allow schema changes that require table replacement ([#8144](https://github.com/aws-amplify/amplify-cli/issues/8144)) ([2d4e65a](https://github.com/aws-amplify/amplify-cli/commit/2d4e65acfd034d33c6fa8ac1f5f8582e7e3bc399))
-
-
-### Reverts
-
-* Revert "feat: Flag to allow schema changes that require table replacement (#8144)" (#8268) ([422dd04](https://github.com/aws-amplify/amplify-cli/commit/422dd04425c72aa7276e086d38ce4d5f4681f9f3)), closes [#8144](https://github.com/aws-amplify/amplify-cli/issues/8144) [#8268](https://github.com/aws-amplify/amplify-cli/issues/8268)
-
-
-
-
-
-## [2.34.7](https://github.com/aws-amplify/amplify-cli/compare/amplify-category-function@2.34.6...amplify-category-function@2.34.7) (2021-09-18)
+## [2.34.5-amplify-export.0](https://github.com/aws-amplify/amplify-cli/compare/amplify-category-function@2.34.4...amplify-category-function@2.34.5-amplify-export.0) (2021-09-03)
 
 **Note:** Version bump only for package amplify-category-function
-
-
-
-
-
-## [2.34.6](https://github.com/aws-amplify/amplify-cli/compare/amplify-category-function@2.34.5...amplify-category-function@2.34.6) (2021-09-14)
-
-
-### Bug Fixes
-
-* **amplify-category-function:** specify UTC tz when selecting start time ([#8053](https://github.com/aws-amplify/amplify-cli/issues/8053)) ([5e3d69a](https://github.com/aws-amplify/amplify-cli/commit/5e3d69aef42d02b661a7ffe878f40de8a3881d5a))
-* remove overwrite of email-only verification when triggers are added ([#7671](https://github.com/aws-amplify/amplify-cli/issues/7671)) ([704295b](https://github.com/aws-amplify/amplify-cli/commit/704295b918701eb81fdaabb786417463672fa02c))
-
-
-
-
-
-## [2.34.5](https://github.com/aws-amplify/amplify-cli/compare/amplify-category-function@2.34.4...amplify-category-function@2.34.5) (2021-09-09)
-
-
-### Bug Fixes
-
-* 'filter' of undefined when removing layers ([#8057](https://github.com/aws-amplify/amplify-cli/issues/8057)) ([b524870](https://github.com/aws-amplify/amplify-cli/commit/b524870200d56901482af5d6b18993ae1f6af6ec))
 
 
 

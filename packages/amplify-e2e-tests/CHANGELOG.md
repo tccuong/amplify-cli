@@ -3,66 +3,7 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
-# [2.51.0](https://github.com/aws-amplify/amplify-cli/compare/amplify-e2e-tests@2.50.0...amplify-e2e-tests@2.51.0) (2021-09-27)
-
-
-### Features
-
-* Flag to allow schema changes that require table replacement ([#8144](https://github.com/aws-amplify/amplify-cli/issues/8144)) ([2d4e65a](https://github.com/aws-amplify/amplify-cli/commit/2d4e65acfd034d33c6fa8ac1f5f8582e7e3bc399))
-
-
-### Reverts
-
-* Revert "feat: Flag to allow schema changes that require table replacement (#8144)" (#8268) ([422dd04](https://github.com/aws-amplify/amplify-cli/commit/422dd04425c72aa7276e086d38ce4d5f4681f9f3)), closes [#8144](https://github.com/aws-amplify/amplify-cli/issues/8144) [#8268](https://github.com/aws-amplify/amplify-cli/issues/8268)
-
-
-
-
-
-# [2.50.0](https://github.com/aws-amplify/amplify-cli/compare/amplify-e2e-tests@2.49.0...amplify-e2e-tests@2.50.0) (2021-09-18)
-
-
-### Features
-
-* **amplify-category-auth:** use usernameAttributes by default, FF for aliasAttributes ([#8188](https://github.com/aws-amplify/amplify-cli/issues/8188)) ([f3044ee](https://github.com/aws-amplify/amplify-cli/commit/f3044eeff21fa900da5aac613db87502526bc165))
-
-
-
-
-
-# [2.49.0](https://github.com/aws-amplify/amplify-cli/compare/amplify-e2e-tests@2.48.0...amplify-e2e-tests@2.49.0) (2021-09-14)
-
-
-
-# 5.6.0 (2021-09-14)
-
-
-### Bug Fixes
-
-* remove overwrite of email-only verification when triggers are added ([#7671](https://github.com/aws-amplify/amplify-cli/issues/7671)) ([704295b](https://github.com/aws-amplify/amplify-cli/commit/704295b918701eb81fdaabb786417463672fa02c))
-
-
-### Features
-
-* **amplify-category-auth:** add auth verification mechanisms to frontend config ([#8037](https://github.com/aws-amplify/amplify-cli/issues/8037)) ([88494b3](https://github.com/aws-amplify/amplify-cli/commit/88494b3f12a9989273aa3ae3e68c629f4c4cdff9))
-* version blocking for CLI ([#7834](https://github.com/aws-amplify/amplify-cli/issues/7834)) ([045ef3b](https://github.com/aws-amplify/amplify-cli/commit/045ef3b83598c287b7e34bb5d1487bbe026026af))
-
-
-### Reverts
-
-* Revert "feat: version blocking for CLI (#7834)" (#8170) ([f5a92e3](https://github.com/aws-amplify/amplify-cli/commit/f5a92e3fcd288ba8f5eb48db62ccf02f6bb7d03d)), closes [#7834](https://github.com/aws-amplify/amplify-cli/issues/7834) [#8170](https://github.com/aws-amplify/amplify-cli/issues/8170)
-* Revert "test: fix version gating e2e test deletion (#8156)" (#8169) ([d43836f](https://github.com/aws-amplify/amplify-cli/commit/d43836fba872e741d0cbf621115f3849cd6cd6de)), closes [#8156](https://github.com/aws-amplify/amplify-cli/issues/8156) [#8169](https://github.com/aws-amplify/amplify-cli/issues/8169)
-
-
-
-
-
-# [2.48.0](https://github.com/aws-amplify/amplify-cli/compare/amplify-e2e-tests@2.47.1...amplify-e2e-tests@2.48.0) (2021-09-09)
-
-
-### Bug Fixes
-
-* runtime hooks readme getting excluded in pkg CLI ([#8100](https://github.com/aws-amplify/amplify-cli/issues/8100)) ([1f491cf](https://github.com/aws-amplify/amplify-cli/commit/1f491cf6dbab4478bff18c084f0ff5c3a6746246))
+# [2.48.0-amplify-export.0](https://github.com/aws-amplify/amplify-cli/compare/amplify-e2e-tests@2.47.1...amplify-e2e-tests@2.48.0-amplify-export.0) (2021-09-03)
 
 
 ### Features
