@@ -4,7 +4,7 @@ import { Duration, Expiration } from '@aws-cdk/core';
 import { StackManager } from '../transformer-context/stack-manager';
 import { AppSyncAuthConfiguration, AppSyncAuthConfigurationEntry, AppSyncAuthMode } from '@aws-amplify/graphql-transformer-interfaces';
 
-const authTypeMap: Record<AppSyncAuthMode, AuthorizationType | string> = {
+const authTypeMap: Record<AppSyncAuthMode, AuthorizationType | any> = {
   API_KEY: AuthorizationType.API_KEY,
   AMAZON_COGNITO_USER_POOLS: AuthorizationType.USER_POOL,
   AWS_IAM: AuthorizationType.IAM,
