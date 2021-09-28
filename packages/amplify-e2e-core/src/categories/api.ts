@@ -89,6 +89,7 @@ export function addApiWithBlankSchema(cwd: string, opts: Partial<AddApiOptions &
           reject(err);
         }
       });
+
   });
 }
 

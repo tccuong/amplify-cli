@@ -265,6 +265,7 @@ export class GraphQLTransform {
       authorizationConfig,
       host: this.options.host,
       sandboxModeEnabled: this.options.sandboxModeEnabled,
+      environmentName: envName.valueAsString,
     });
     const authModes = [authorizationConfig.defaultAuthorization, ...(authorizationConfig.additionalAuthorizationModes || [])].map(
       mode => mode?.authorizationType,
