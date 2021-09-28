@@ -354,6 +354,8 @@ export async function transformGraphQLSchema(context, options) {
         authConfig.additionalAuthenticationProviders.push(await addGraphQLAuthRequirement(context, 'OPENID_CONNECT'));
       } else if (err.message === `@auth directive with 'apiKey' provider found, but the project has no API Key authentication provider configured.`) {
         authConfig.additionalAuthenticationProviders.push(await addGraphQLAuthRequirement(context, 'AWS_KEY'));
+      } else if (err.message === `@auth directive with 'function' provider found, but the project has no Lambda authentication provider configured.`) {
+        authConfig.additionalAuthenticationProviders.push(await addGraphQLAuthRequirement(context, 'AWS_LAMBDA'));
       } else {
         throw err;
       }
