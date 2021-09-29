@@ -11,6 +11,7 @@ stateManager_mock.getResourceParametersJson.mockReturnValue({
   passwordPolicyMinLength: '10',
   mfaConfiguration: 'ON',
   mfaTypes: ['SMS Text Message'],
+  authProvidersUserPool: ['Google', 'Facebook', 'LoginWithAmazon', 'SignInWithApple'],
 });
 
 stateManager_mock.setMeta.mockImplementation(jest.fn());
@@ -30,7 +31,7 @@ describe('ensureAmplifyMetaFrontendConfig', () => {
       auth: {
         authResource: {
           frontendAuthConfig: {
-            loginMechanisms: ['EMAIL'],
+            loginMechanisms: ['EMAIL', 'GOOGLE', 'FACEBOOK', 'AMAZON', 'APPLE'],
             mfaConfiguration: 'ON',
             mfaTypes: ['SMS'],
             passwordProtectionSettings: { passwordPolicyCharacters: [], passwordPolicyMinLength: '10' },
