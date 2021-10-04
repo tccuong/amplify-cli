@@ -3,8 +3,10 @@ import { ServiceName, provider } from '../service-utils/constants';
 import { $TSObject, open, stateManager } from 'amplify-cli-core';
 import { $TSContext } from 'amplify-cli-core';
 import { addPlaceIndexResource, updatePlaceIndexResource, removePlaceIndexResource } from './placeIndex';
-import { addMapResource, updateMapResource, removeMapResource } from './map';
+import { addMapResource, updateMapResource, removeMapResource, addMapResourceHeadless } from './map';
 import { printer } from 'amplify-prompts';
+import { validateAddGeoRequest } from 'amplify-util-headless-input';
+import { MapConfiguration } from 'amplify-headless-interface';
 
 /**
  * Entry point for creating a new Geo resource
@@ -117,4 +119,25 @@ export const openConsole = (service: string) => {
     url = `https://${region}.console.aws.amazon.com/location/${selection}/home?region=${region}#/`;
   }
   open(url, { wait: false });
+};
+
+/**
+ * Entry point for headless command of creating a new Geo resource
+ */
+ export const addResourceHeadless = async (
+  context: $TSContext,
+  headlessPayload: string
+): Promise<string | undefined> => {
+  if(!projectHasAuth()) {
+    throw new Error('Please add auth (Amazon Cognito) to your project using "amplify add auth"');
+  }
+  const { serviceConfiguration } = await validateAddGeoRequest(headlessPayload);
+  const { serviceType } = serviceConfiguration;
+  switch (serviceType) {
+    case ServiceName.Map:
+      return addMapResourceHeadless(context, serviceConfiguration as MapConfiguration);
+    case ServiceName.PlaceIndex:
+    default:
+      throw new Error(`amplify-category-geo is not configured to provide service type ${serviceType}`);
+  }
 };
