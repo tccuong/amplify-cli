@@ -389,6 +389,7 @@ const updateApiInputWalkthrough = async (context, project, resolverConfig, model
 export const serviceWalkthrough = async (context: $TSContext, defaultValuesFilename, serviceMetadata) => {
   const resourceName = resourceAlreadyExists(context);
   const useExperimentalPipelineTransformer = FeatureFlags.getBoolean('graphQLTransformer.useExperimentalPipelinedTransformer');
+  await addLambdaAuthorizerChoice();
 
   if (resourceName) {
     const errMessage =
@@ -435,6 +436,7 @@ export const updateWalkthrough = async (context): Promise<UpdateApiRequest> => {
   let resource;
   let authConfig;
   const resources = allResources.filter(resource => resource.service === 'AppSync');
+  await addLambdaAuthorizerChoice();
 
   // There can only be one appsync resource
   if (resources.length > 0) {
@@ -655,11 +657,8 @@ async function askSyncFunctionQuestion(context) {
 
   return { newFunction, lambdaFunctionName };
 }
-async function askDefaultAuthQuestion(context) {
-  const currentAuthConfig = getAppSyncAuthConfig(context.amplify.getProjectMeta());
-  const currentDefaultAuth =
-    currentAuthConfig && currentAuthConfig.defaultAuthentication ? currentAuthConfig.defaultAuthentication.authenticationType : undefined;
 
+async function addLambdaAuthorizerChoice() {
   const useExperimentalPipelineTransformer = FeatureFlags.getBoolean('graphQLTransformer.useExperimentalPipelinedTransformer');
   if (useExperimentalPipelineTransformer && !authProviderChoices.find(choice => choice.value == 'AWS_LAMBDA')) {
     authProviderChoices.push({
@@ -667,6 +666,13 @@ async function askDefaultAuthQuestion(context) {
         value: 'AWS_LAMBDA',
     });
   }
+}
+
+async function askDefaultAuthQuestion(context) {
+  await addLambdaAuthorizerChoice();
+  const currentAuthConfig = getAppSyncAuthConfig(context.amplify.getProjectMeta());
+  const currentDefaultAuth =
+    currentAuthConfig && currentAuthConfig.defaultAuthentication ? currentAuthConfig.defaultAuthentication.authenticationType : undefined;
 
   const defaultAuthTypeQuestion = {
     type: 'list',
@@ -1029,20 +1035,14 @@ const getAuthTypes = authConfig => {
   return [...uniqueAuthTypes.keys()];
 };
 
-
-// Chris P - Added for Lambda Authorizer
-
 async function askLambdaQuestion(context) {
-
   const existingFunctions = functionsExist(context);
-
   const choices = [
     {
       name: 'Create a new Lambda function',
       value: 'newFunction',
     },
   ];
-
   if (existingFunctions) {
     choices.push({
       name: 'Use a Lambda function already added in the current Amplify project',
@@ -1051,7 +1051,6 @@ async function askLambdaQuestion(context) {
   }
 
   let defaultFunctionType = 'newFunction';
-
   const lambdaAnswer = await inquirer.prompt({
     name: 'functionType',
     type: 'list',
@@ -1061,7 +1060,6 @@ async function askLambdaQuestion(context) {
   });
 
   const { lambdaFunction } = await askLambdaSource(context, lambdaAnswer.functionType);
-
   const { ttlSeconds } = await inquirer.prompt({
     type: 'input',
     name: 'ttlSeconds',
@@ -1141,6 +1139,10 @@ async function askLambdaFromProject(context) {
     choices: lambdaFunctions,
     default: lambdaFunctions[0],
   });
+
+  await context.amplify.invokePluginMethod(context, 'function', undefined, 'addAppSyncInvokeMethodPermission', [
+    answer.lambdaFunction,
+  ]);
 
   return { lambdaFunction: answer.lambdaFunction };
 }

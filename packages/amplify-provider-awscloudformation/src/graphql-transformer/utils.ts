@@ -279,6 +279,9 @@ function ensureAuthRuleDefaults(rules: AuthRule[]) {
         case 'public':
           rule.provider = 'apiKey';
           break;
+        case 'custom':
+          rule.provider = 'function';
+          break;
         default:
           rule.provider = null;
           break;
@@ -302,6 +305,9 @@ function convertModelRulesToRoles(acm: AccessControlMatrix, authRules: AuthRule[
       switch (rule.provider) {
         case 'apiKey':
           roleName = 'apiKey:public';
+          break;
+        case 'function':
+          roleName = 'function:custom';
           break;
         case 'iam':
           roleName = `iam:${rule.allow}`;

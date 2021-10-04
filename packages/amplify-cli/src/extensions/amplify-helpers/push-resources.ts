@@ -68,24 +68,65 @@ export async function pushResources(
   }
 
   if (continueToPush) {
-    try {
-      // Get current-cloud-backend's amplify-meta
-      const currentAmplifyMeta = stateManager.getCurrentMeta();
+    let retryPush;
+    do {
+      retryPush = false;
+      try {
+        // Get current-cloud-backend's amplify-meta
+        const currentAmplifyMeta = stateManager.getCurrentMeta();
 
-      await providersPush(context, category, resourceName, filteredResources);
-      await onCategoryOutputsChange(context, currentAmplifyMeta);
-    } catch (err) {
-      // Handle the errors and print them nicely for the user.
-      context.print.error(`\n${err.message}`);
+        await providersPush(context, category, resourceName, filteredResources);
+        await onCategoryOutputsChange(context, currentAmplifyMeta);
+      } catch (err) {
+        if (await isValidGraphQLAuthError(err.message)) {
+          retryPush = await handleValidGraphQLAuthError(context, err.message);
+        }
 
-      throw err;
-    }
+        if (!retryPush) {
+          // Handle the errors and print them nicely for the user.
+          context.print.error(`\n${err.message}`);
+          throw err;
+        }
+      }
+    } while (retryPush);
   } else {
     // there's currently no other mechanism to stop the execution of the postPush workflow in this case, so exiting here
     exitOnNextTick(1);
   }
 
   return continueToPush;
+}
+
+async function isValidGraphQLAuthError(message: string) {
+  if (message === `@auth directive with 'iam' provider found, but the project has no IAM authentication provider configured.`
+    || message === `@auth directive with 'userPools' provider found, but the project has no Cognito User Pools authentication provider configured.`
+    || message === `@auth directive with 'oidc' provider found, but the project has no OPENID_CONNECT authentication provider configured.`
+    || message === `@auth directive with 'apiKey' provider found, but the project has no API Key authentication provider configured.`
+    || message === `@auth directive with 'function' provider found, but the project has no Lambda authentication provider configured.`) {
+    return true;
+  }
+}
+
+async function handleValidGraphQLAuthError(context: $TSContext, message: string) {
+  if (message === `@auth directive with 'iam' provider found, but the project has no IAM authentication provider configured.`) {
+    await addGraphQLAuthRequirement(context, 'AWS_IAM');
+    return true;
+  } else if (!context?.parameters?.options?.yes) {
+    if (message === `@auth directive with 'userPools' provider found, but the project has no Cognito User Pools authentication provider configured.`) {
+      await addGraphQLAuthRequirement(context, 'AMAZON_COGNITO_USER_POOLS');
+      return true;
+    } else if (message === `@auth directive with 'oidc' provider found, but the project has no OPENID_CONNECT authentication provider configured.`) {
+      await addGraphQLAuthRequirement(context, 'OPENID_CONNECT')
+      return true;
+    } else if (message === `@auth directive with 'apiKey' provider found, but the project has no API Key authentication provider configured.`) {
+      await addGraphQLAuthRequirement(context, 'AWS_KEY');
+      return true;
+    } else if (message === `@auth directive with 'function' provider found, but the project has no Lambda authentication provider configured.`) {
+      await addGraphQLAuthRequirement(context, 'AWS_LAMBDA');
+      return true;
+    }
+  }
+  return false;
 }
 
 async function providersPush(context: $TSContext, category, resourceName, filteredResources) {
@@ -113,4 +154,15 @@ export async function storeCurrentCloudBackend(context: $TSContext) {
   }
 
   await Promise.all(providerPromises);
+}
+
+async function addGraphQLAuthRequirement(context, authType) {
+  return await context.amplify.invokePluginMethod(context, 'api', undefined, 'addGraphQLAuthorizationMode', [
+    context,
+    {
+      authType: authType,
+      printLeadText: true,
+      authSettings: undefined,
+    },
+  ]);
 }

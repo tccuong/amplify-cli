@@ -159,7 +159,18 @@
                     ]
                 }
             }
-        }<% if (props.categoryPolicies && props.categoryPolicies.length > 0 ) { %>
+        }
+        ,"PermissionForAppSyncToInvokeLambda": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+                "FunctionName": {
+                    "Ref": "LambdaFunction"
+                    },
+                "Action": "lambda:InvokeFunction",
+                "Principal": "appsync.amazonaws.com"
+            }
+        }
+        <% if (props.categoryPolicies && props.categoryPolicies.length > 0 ) { %>
         ,"AmplifyResourcesPolicy": {
             "DependsOn": ["LambdaExecutionRole"],
             "Type": "AWS::IAM::Policy",

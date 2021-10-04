@@ -85,12 +85,14 @@ export const authDirectiveDefinition = `
     groups
     private
     public
+    custom
   }
   enum AuthProvider {
     apiKey
     iam
     oidc
     userPools
+    function
   }
   enum ModelOperation {
     create
