@@ -1,19 +1,22 @@
 import {
   amplifyPush,
+  amplifyPushGraphQlWithCognitoPrompt,
   deleteProject,
   initJSProjectWithProfile,
+  addApiWithoutSchema,
   addApiWithAllAuthModesV2,
   createNewProjectDir,
   deleteProjectDir,
   getAppSyncApi,
   getProjectMeta,
   addFeatureFlag,
+  updateApiSchema,
 } from 'amplify-e2e-core';
 import path from 'path';
 import { existsSync } from 'fs';
 import _ from 'lodash';
 
-describe('amplify add graphql api with lambda auth mode', () => {
+describe('test graphql lambda authorizer and auto apply auth mode', () => {
   let projRoot: string;
   let projFolderName: string;
   beforeEach(async () => {
@@ -29,13 +32,36 @@ describe('amplify add graphql api with lambda auth mode', () => {
     deleteProjectDir(projRoot);
   });
 
-  it('init a project and add the simple_model api', async () => {
+  // it('amplify add graphql api with lambda auth mode', async () => {
+  //   const envName = 'devtest';
+  //   const projName = 'lambdaauthmode';
+  //   await initJSProjectWithProfile(projRoot, { name: projName, envName });
+  //   await addFeatureFlag(projRoot, 'graphqltransformer', 'useexperimentalpipelinedtransformer', true);
+  //   await addApiWithAllAuthModesV2(projRoot);
+  //   await amplifyPush(projRoot);
+
+  //   const meta = getProjectMeta(projRoot);
+  //   const region = meta.providers.awscloudformation.Region;
+  //   const { output } = meta.api.lambdaauthmode;
+  //   const { GraphQLAPIIdOutput, GraphQLAPIEndpointOutput, GraphQLAPIKeyOutput } = output;
+  //   const { graphqlApi } = await getAppSyncApi(GraphQLAPIIdOutput, region);
+
+  //   expect(GraphQLAPIIdOutput).toBeDefined();
+  //   expect(GraphQLAPIEndpointOutput).toBeDefined();
+  //   expect(GraphQLAPIKeyOutput).toBeDefined();
+
+  //   expect(graphqlApi).toBeDefined();
+  //   expect(graphqlApi.apiId).toEqual(GraphQLAPIIdOutput);
+  // });
+
+  it('amplify push prompt for cognito configuration if auth mode is missing', async () => {
     const envName = 'devtest';
     const projName = 'lambdaauthmode';
     await initJSProjectWithProfile(projRoot, { name: projName, envName });
     await addFeatureFlag(projRoot, 'graphqltransformer', 'useexperimentalpipelinedtransformer', true);
-    await addApiWithAllAuthModesV2(projRoot);
-    await amplifyPush(projRoot);
+    await addApiWithoutSchema(projRoot);
+    await updateApiSchema(projRoot, projName, 'cognito_simple_model.graphql');
+    await amplifyPushGraphQlWithCognitoPrompt(projRoot);
 
     const meta = getProjectMeta(projRoot);
     const region = meta.providers.awscloudformation.Region;
