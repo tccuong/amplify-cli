@@ -17,6 +17,7 @@ import {
   makeNamedType,
   makeNonNullType,
   ModelResourceIDs,
+  ResolverResourceIDs,
   ResourceConstants,
   unwrapNonNull,
 } from 'graphql-transformer-common';
@@ -290,6 +291,7 @@ function createResolver(stack: cdk.Stack, dataSourceId: string, context: Transfo
       ),
       `${config.resolverTypeName}.${config.resolverFieldName}.res.vtl`,
     ),
+    undefined,
     dataSourceId,
     undefined,
     stack,
@@ -302,7 +304,7 @@ function replaceEnvAndRegion(env: cdk.CfnParameter, region: string, value: strin
   } = {};
 
   if (value.includes('${env}')) {
-    vars.env = (env as unknown) as string;
+    vars.env = env as unknown as string;
   }
 
   if (value.includes('${aws_region}')) {

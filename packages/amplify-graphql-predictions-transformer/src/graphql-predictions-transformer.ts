@@ -16,7 +16,14 @@ import * as appsync from '@aws-cdk/aws-appsync';
 import * as cdk from '@aws-cdk/core';
 import * as iam from '@aws-cdk/aws-iam';
 import * as lambda from '@aws-cdk/aws-lambda';
-import { makeListType, makeNamedType, makeNonNullType, PredictionsResourceIDs, ResourceConstants } from 'graphql-transformer-common';
+import {
+  makeListType,
+  makeNamedType,
+  makeNonNullType,
+  PredictionsResourceIDs,
+  ResolverResourceIDs,
+  ResourceConstants,
+} from 'graphql-transformer-common';
 import {
   DirectiveNode,
   FieldDefinitionNode,
@@ -383,6 +390,7 @@ function createResolver(
         ]),
       ),
     ),
+    undefined,
     undefined,
     pipelineFunctions,
     stack,
