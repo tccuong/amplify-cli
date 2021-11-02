@@ -66,6 +66,10 @@ export class Recorder {
     this.addFrame(this.renderPrompt(this.cwd, this.cmd, this.args));
     this.childProcess.onData(this.onData.bind(this));
     this.childProcess.onExit(this.onExit.bind(this));
+    if (process.platform === 'win32') {
+      // Set powershell buffer to 1000 cols
+      this.childProcess.write('mode con: lines=25 cols=1000');
+    }
   }
 
   write(data: string): void {
