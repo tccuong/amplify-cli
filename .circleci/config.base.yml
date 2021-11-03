@@ -722,6 +722,7 @@ workflows:
                 - master
                 - /tagged-release\/.*/
                 - /run-e2e\/.*/
+                - /run-e2e-pkg\/.*/
           requires:
             - build
       - integration_test:
@@ -746,6 +747,7 @@ workflows:
                 - release
                 - /tagged-release\/.*/
                 - /run-e2e\/.*/
+                - /run-e2e-pkg\/.*/
           requires:
             - build
       - build_pkg_binaries:
@@ -775,6 +777,7 @@ workflows:
                 - master
                 - /tagged-release\/.*/
                 - /run-e2e\/.*/
+                - /run-e2e-pkg\/.*/
           requires:
             - publish_to_local_registry
       - amplify_e2e_tests_pkg:
@@ -789,6 +792,7 @@ workflows:
                 - master
                 - /tagged-release\/.*/
                 - /run-e2e\/.*/
+                - /run-e2e-pkg\/.*/
           requires:
             - build_pkg_binaries
       - amplify_migration_tests_latest:
