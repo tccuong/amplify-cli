@@ -280,7 +280,7 @@ function splitTests(
               AMPLIFY_DIR: '/home/circleci/repo/packages/amplify-cli/bin',
               AMPLIFY_PATH: '/home/circleci/repo/packages/amplify-cli/bin/amplify',
             }
-          : {}),
+          : { AMPLIFY_PATH: '/home/circleci/.npm-global/lib/node_modules/@aws-amplify/cli/bin/amplify' }),
       };
     }
     return { ...acc, [newJobName]: newJob };
