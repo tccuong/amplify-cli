@@ -210,13 +210,13 @@ describe('transformer @auth migration test', () => {
       }
     `;
 
-    // This is expected because v2 expects 'Allow unauthenticated logins?' to be set to 'Yes' in [Auth] resource to allow IAM public rule
-    await expect(
-      appSyncClientViaIAM.mutate({
-        mutation: gql(createPostPublicIAMMutation),
-        fetchPolicy: 'no-cache',
-      }),
-    ).rejects.toThrowError('GraphQL error: Not Authorized to access createPostPublicIAM on type PostPublicIAM');
+    createPostPublicIAMResult = appSyncClientViaIAM.mutate({
+      mutation: gql(createPostPublicIAMMutation),
+      fetchPolicy: 'no-cache',
+    });
+
+    expect(createPostPublicIAMResult.errors).toBeUndefined();
+    expect(createPostPublicIAMResult.data).toBeDefined();
 
     createSalaryMutation = /* GraphQL */ `
       mutation CreateSalary {
