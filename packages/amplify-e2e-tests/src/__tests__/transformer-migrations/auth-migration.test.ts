@@ -11,6 +11,7 @@ import {
   updateApiWithMultiAuth,
   addApiWithoutSchema,
   updateAuthAddUserGroups,
+  amplifyPushForce,
 } from 'amplify-e2e-core';
 import {
   configureAmplify,
@@ -81,10 +82,7 @@ describe('transformer @auth migration test', () => {
       awsconfig.aws_appsync_region,
       apiKey,
     );
-    let appSyncClientViaIAM = getConfiguredAppsyncClientIAMAuth(
-      awsconfig.aws_appsync_graphqlEndpoint,
-      awsconfig.aws_appsync_region,
-    );
+    let appSyncClientViaIAM = getConfiguredAppsyncClientIAMAuth(awsconfig.aws_appsync_graphqlEndpoint, awsconfig.aws_appsync_region);
 
     let createPostMutation = /* GraphQL */ `
       mutation CreatePost {
@@ -155,14 +153,10 @@ describe('transformer @auth migration test', () => {
     addFeatureFlag(projRoot, 'graphqltransformer', 'useExperimentalPipelinedTransformer', true);
 
     updateApiSchema(projRoot, projectName, modelSchemaV2);
-    await amplifyPushUpdate(projRoot);
+    await amplifyPushForce(projRoot); // uses '--force' because the schema doesn't change
 
     apiKey = getApiKey(projRoot);
-    appSyncClientViaUser = getConfiguredAppsyncClientCognitoAuth(
-      awsconfig.aws_appsync_graphqlEndpoint,
-      awsconfig.aws_appsync_region,
-      user,
-    );
+    appSyncClientViaUser = getConfiguredAppsyncClientCognitoAuth(awsconfig.aws_appsync_graphqlEndpoint, awsconfig.aws_appsync_region, user);
     appSyncClientViaApiKey = getConfiguredAppsyncClientAPIKeyAuth(
       awsconfig.aws_appsync_graphqlEndpoint,
       awsconfig.aws_appsync_region,
