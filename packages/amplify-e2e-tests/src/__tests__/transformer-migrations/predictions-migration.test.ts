@@ -33,7 +33,7 @@ describe('transformer predictions migration test', () => {
   it('migration of predictions directives', async () => {
     const predictionsSchema = 'transformer_migration/predictions.graphql';
 
-    await addApiWithoutSchema(projRoot, { apiName: projectName });
+    await addApiWithoutSchema(projRoot, { apiName: projectName, transformerVersion: 1 });
     await updateApiSchema(projRoot, projectName, predictionsSchema);
     await amplifyPush(projRoot);
 
@@ -52,7 +52,9 @@ describe('transformer predictions migration test', () => {
 
     expect(translateResult.errors).toBeUndefined();
     expect(translateResult.data).toBeDefined();
-    expect((translateResult.data as any).translateThis).toMatch(/((\bDies\b)|(\bdas\b)|(\bder\b)) ist ein Sprachtest/i);
+    expect((translateResult.data as any).translateThis).toMatch(
+      /((\bDies\b)|(\bdas\b)|(\bder\b)) ist ein ((\bStimmtest\b)|(\Sprachtest\b))/i,
+    );
 
     let speakQuery = /* GraphQL */ `
       query SpeakTranslatedText {
@@ -91,7 +93,9 @@ describe('transformer predictions migration test', () => {
 
     expect(translateResult.errors).toBeUndefined();
     expect(translateResult.data).toBeDefined();
-    expect((translateResult.data as any).translateThis).toMatch(/((\bDies\b)|(\bdas\b)|(\bder\b)) ist ein Sprachtest/i);
+    expect((translateResult.data as any).translateThis).toMatch(
+      /((\bDies\b)|(\bdas\b)|(\bder\b)) ist ein ((\bStimmtest\b)|(\Sprachtest\b))/i,
+    );
 
     speakResult = await appSyncClient.query({
       query: gql(speakQuery),
