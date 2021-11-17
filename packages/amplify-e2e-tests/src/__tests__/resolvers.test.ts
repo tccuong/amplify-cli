@@ -38,7 +38,7 @@ describe('user created resolvers', () => {
       const resolver = '$util.unauthorized()';
       const generatedResolverPath = join(projectDir, 'amplify', 'backend', 'api', apiName, 'build', 'resolvers', resolverName);
 
-      await addApiWithoutSchema(projectDir, { apiName });
+      await addApiWithoutSchema(projectDir, { apiName, transformerVersion: 1 });
       await updateApiSchema(projectDir, apiName, 'simple_model.graphql');
       await apiGqlCompile(projectDir, true);
 
@@ -57,7 +57,7 @@ describe('user created resolvers', () => {
       const slot = '$util.unauthorized()';
       const generatedResolverPath = join(projectDir, 'amplify', 'backend', 'api', apiName, 'build', 'resolvers', slotName);
 
-      await addApiWithoutSchema(projectDir, { apiName });
+      await addApiWithoutSchema(projectDir, { apiName, transformerVersion: 1 });
       updateApiSchema(projectDir, apiName, 'model_with_sandbox_mode.graphql');
       await amplifyPush(projectDir);
 
@@ -130,7 +130,7 @@ describe('user created resolvers', () => {
         },
       };
 
-      await addApiWithoutSchema(projectDir, { apiName });
+      await addApiWithoutSchema(projectDir, { apiName, transformerVersion: 1 });
       await updateApiSchema(projectDir, apiName, 'custom_query.graphql');
       await apiGqlCompile(projectDir, true);
 
