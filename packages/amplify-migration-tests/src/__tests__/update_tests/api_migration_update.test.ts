@@ -38,7 +38,7 @@ describe('api migration update test', () => {
     const nextSchema = 'next_key_blog.graphql';
     // init the project and add api with installed cli
     await initJSProjectWithProfile(projRoot, { name: projectName });
-    await addApiWithoutSchema(projRoot);
+    await addApiWithoutSchema(projRoot, { transformerVersion: 1 });
     await updateApiSchema(projRoot, projectName, initialSchema);
     await amplifyPush(projRoot);
     // update api and push with the CLI to be released (the codebase)
@@ -54,7 +54,7 @@ describe('api migration update test', () => {
   it('api update migration with multiauth', async () => {
     // init and add api with installed CLI
     await initJSProjectWithProfile(projRoot, { name: 'simplemodelmultiauth' });
-    await addApiWithoutSchema(projRoot);
+    await addApiWithoutSchema(projRoot, { transformerVersion: 1 });
     await updateApiSchema(projRoot, 'simplemodelmultiauth', 'simple_model.graphql');
     // update and push with codebase
     await updateApiWithMultiAuth(projRoot, { testingWithLatestCodebase: true });
@@ -100,7 +100,7 @@ describe('api migration update test', () => {
     const name = `syncenabled`;
     // init and add api with locally installed cli
     await initJSProjectWithProfile(projRoot, { name });
-    await addApiWithBlankSchemaAndConflictDetection(projRoot);
+    await addApiWithBlankSchemaAndConflictDetection(projRoot, { transformerVersion: 1 });
     await updateApiSchema(projRoot, name, 'simple_model.graphql');
 
     let transformConfig = getTransformConfig(projRoot, name);
