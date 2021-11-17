@@ -37,7 +37,7 @@ describe('amplify key force push', () => {
     const initialSchema = 'migrations_key/simple_key.graphql';
     const { projectName } = getProjectConfig(projRoot);
     // add api and push with installed cli
-    await addApiWithoutSchemaOldDx(projRoot);
+    await addApiWithoutSchemaOldDx(projRoot, { transformerVersion: 1 });
     updateApiSchema(projRoot, projectName, initialSchema);
     await amplifyPush(projRoot);
     // gql-compile and force push with codebase cli

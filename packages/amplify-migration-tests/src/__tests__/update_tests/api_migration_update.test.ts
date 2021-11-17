@@ -53,7 +53,7 @@ describe('api migration update test', () => {
     const nextSchema = 'next_key_blog.graphql';
     // init the project and add api with installed cli
     const { projectName } = getProjectConfig(projRoot);
-    await addApiWithoutSchemaOldDx(projRoot);
+    await addApiWithoutSchemaOldDx(projRoot, { transformerVersion: 1 });
     updateApiSchema(projRoot, projectName, initialSchema);
     await amplifyPush(projRoot);
 
@@ -70,7 +70,7 @@ describe('api migration update test', () => {
   it('api update migration with multiauth', async () => {
     // init and add api with installed CLI
     const { projectName } = getProjectConfig(projRoot);
-    await addApiWithoutSchemaOldDx(projRoot);
+    await addApiWithoutSchemaOldDx(projRoot, { transformerVersion: 1 });
     updateApiSchema(projRoot, projectName, 'simple_model.graphql');
     // update and push with codebase
     await updateApiWithMultiAuth(projRoot, { testingWithLatestCodebase: true });
@@ -115,7 +115,7 @@ describe('api migration update test', () => {
   it('init a sync enabled project and update conflict resolution strategy', async () => {
     // add api with locally installed cli
     const { projectName: name } = getProjectConfig(projRoot);
-    await addApiWithSchemaAndConflictDetectionOldDx(projRoot, 'simple_model.graphql');
+    await addApiWithSchemaAndConflictDetectionOldDx(projRoot, 'simple_model.graphql', { transformerVersion: 1 });
 
     let transformConfig = getTransformConfig(projRoot, name);
     expect(transformConfig).toBeDefined();

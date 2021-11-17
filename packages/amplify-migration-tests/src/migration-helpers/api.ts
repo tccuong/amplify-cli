@@ -1,4 +1,4 @@
-import { defaultOptions, nspawn as spawn, getCLIPath, AddApiOptions, KEY_DOWN_ARROW, getSchemaPath } from 'amplify-e2e-core';
+import { defaultOptions, nspawn as spawn, getCLIPath, AddApiOptions, KEY_DOWN_ARROW, getSchemaPath, addFeatureFlag } from 'amplify-e2e-core';
 import _ from 'lodash';
 
 /**
@@ -36,10 +36,16 @@ export function addApiWithoutSchemaOldDx(cwd: string, opts: Partial<AddApiOption
           reject(err);
         }
       });
+
+    if (options.transformerVersion === 1) {
+      addFeatureFlag(cwd, 'graphqltransformer', 'transformerVersion', 1);
+      addFeatureFlag(cwd, 'graphqltransformer', 'useExperimentalPipelinedTransformer', false);
+    }
   });
 }
 
-export function addApiWithSchemaAndConflictDetectionOldDx(cwd: string, schemaFile: string) {
+export function addApiWithSchemaAndConflictDetectionOldDx(cwd: string, schemaFile: string, opts: Partial<AddApiOptions> = {}) {
+  const options = _.assign(defaultOptions, opts);
   const schemaPath = getSchemaPath(schemaFile);
   return new Promise<void>((resolve, reject) => {
     spawn(getCLIPath(), ['add', 'api'], { cwd, stripColors: true })
@@ -75,5 +81,10 @@ export function addApiWithSchemaAndConflictDetectionOldDx(cwd: string, schemaFil
           reject(err);
         }
       });
+
+    if (options.transformerVersion === 1) {
+      addFeatureFlag(cwd, 'graphqltransformer', 'transformerVersion', 1);
+      addFeatureFlag(cwd, 'graphqltransformer', 'useExperimentalPipelinedTransformer', false);
+    }
   });
 }
