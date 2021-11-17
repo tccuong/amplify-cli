@@ -28,7 +28,7 @@ describe('amplify key force push', () => {
     const initialSchema = 'migrations_key/initial_schema.graphql';
     // init, add api and push with installed cli
     await initJSProjectWithProfile(projRoot, { name: projectName });
-    await addApiWithoutSchema(projRoot);
+    await addApiWithoutSchema(projRoot, { transformerVersion: 1 });
     await updateApiSchema(projRoot, projectName, initialSchema);
     await amplifyPush(projRoot);
     // add feature flag

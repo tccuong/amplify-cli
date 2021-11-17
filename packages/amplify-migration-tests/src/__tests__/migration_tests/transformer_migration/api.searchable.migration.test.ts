@@ -26,7 +26,7 @@ describe('amplify searchable migration', () => {
     const nextSchema = 'migrations_searchable/updated_searchable.graphql';
     // init, add api and push with installed cli
     await initJSProjectWithProfile(projRoot, { name: projectName });
-    await addApiWithoutSchema(projRoot);
+    await addApiWithoutSchema(projRoot, { transformerVersion: 1 });
     await updateApiSchema(projRoot, projectName, initialSchema);
     await amplifyPush(projRoot);
     // update and push with codebase cli
