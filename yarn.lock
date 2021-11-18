@@ -1033,7 +1033,7 @@
     "@aws-cdk/custom-resources" "1.124.0"
     constructs "^3.3.69"
 
-"@aws-cdk/aws-elasticsearch@^1.129.0":
+"@aws-cdk/aws-elasticsearch@^1.124.0":
   version "1.132.0"
   resolved "https://registry.yarnpkg.com/@aws-cdk/aws-elasticsearch/-/aws-elasticsearch-1.132.0.tgz#856ed15e8a45fa34963462baf308d1988fd36621"
   integrity sha512-Dz4/AJfXNij1RV/oX0/wUPFY3xgoJC3+Frl56/bs5I/pKqJDzMYOBXW0MS2eZ599ANN06aigFt3iuh6IMS2SpA==

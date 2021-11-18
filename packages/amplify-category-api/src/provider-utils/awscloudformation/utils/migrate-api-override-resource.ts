@@ -109,9 +109,9 @@ const generateCliInputs = (parameters: ApiMetaData, apiResourceDir: string): App
       serviceName: 'AppSync',
       defaultAuthType: authConfigToAppSyncAuthType(parameters.authConfig ? parameters.authConfig.defaultAuthentication : undefined),
       additionalAuthTypes:
-        parameters.authConfig && parameters.authConfig.additionalAuthenticationProviders
+        !_.isEmpty(parameters.authConfig) && !_.isEmpty(parameters.authConfig.additionalAuthenticationProviders)
           ? parameters.authConfig.additionalAuthenticationProviders.map(authConfigToAppSyncAuthType)
-          : undefined,
+          : [],
       conflictResolution: resolverConfigToConflictResolution(parameters.resolverConfig),
       apiName: parameters.resourceName,
       gqlSchemaPath: path.join(apiResourceDir, gqlSchemaFilename),
