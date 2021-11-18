@@ -455,29 +455,29 @@ function verifyConfig() {
 
 function main(): void {
   const config = loadConfig();
-  const splitNodeTests = splitTests(
-    config,
-    'amplify_e2e_tests',
-    'build_test_deploy',
-    join(repoRoot, 'packages', 'amplify-e2e-tests'),
-    CONCURRENCY,
-  );
-  const splitPkgTests = splitTests(
-    splitNodeTests,
-    'amplify_e2e_tests_pkg',
-    'build_test_deploy',
-    join(repoRoot, 'packages', 'amplify-e2e-tests'),
-    CONCURRENCY,
-  );
-  const splitGqlTests = splitTests(
-    splitPkgTests,
-    'graphql_e2e_tests',
-    'build_test_deploy',
-    join(repoRoot, 'packages', 'graphql-transformers-e2e-tests'),
-    CONCURRENCY,
-  );
+  // const splitNodeTests = splitTests(
+  //   config,
+  //   'amplify_e2e_tests',
+  //   'build_test_deploy',
+  //   join(repoRoot, 'packages', 'amplify-e2e-tests'),
+  //   CONCURRENCY,
+  // );
+  // const splitPkgTests = splitTests(
+  //   splitNodeTests,
+  //   'amplify_e2e_tests_pkg',
+  //   'build_test_deploy',
+  //   join(repoRoot, 'packages', 'amplify-e2e-tests'),
+  //   CONCURRENCY,
+  // );
+  // const splitGqlTests = splitTests(
+  //   splitPkgTests,
+  //   'graphql_e2e_tests',
+  //   'build_test_deploy',
+  //   join(repoRoot, 'packages', 'graphql-transformers-e2e-tests'),
+  //   CONCURRENCY,
+  // );
   const splitV5MigrationTests = splitTests(
-    splitGqlTests,
+    config,
     'amplify_migration_tests_v5',
     'build_test_deploy',
     join(repoRoot, 'packages', 'amplify-migration-tests'),
