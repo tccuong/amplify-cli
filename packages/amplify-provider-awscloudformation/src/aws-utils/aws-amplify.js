@@ -8,7 +8,6 @@ async function getConfiguredAmplifyClient(context, options = {}) {
   let defaultOptions = {};
   const httpProxy = process.env.HTTP_PROXY || process.env.HTTPS_PROXY;
   const envVarEndpoint = process.env.AWS_AMPLIFY_ENDPOINT;
-
   try {
     cred = await configurationManager.loadConfiguration(context);
   } catch (e) {

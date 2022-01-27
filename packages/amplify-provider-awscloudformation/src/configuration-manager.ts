@@ -600,6 +600,8 @@ function loadConfigFromPath(profilePath: string): AwsSdkConfig {
   if (fs.existsSync(profilePath)) {
     const config = JSONUtilities.readJson<AwsSdkConfig>(profilePath);
     if (config.accessKeyId && config.secretAccessKey && config.region) {
+      config.endpoint = 'http://localhost:4566';
+      config.s3ForcePathStyle = true;
       return config;
     }
   }
@@ -615,6 +617,8 @@ export async function loadConfigurationForEnv(context: $TSContext, env: string, 
       awsConfigInfo.region = resolveRegion();
     }
 
+    awsConfigInfo.endpoint = 'http://localhost:4566';
+    awsConfigInfo.s3ForcePathStyle = true;
     return awsConfigInfo.config;
   }
 
@@ -645,6 +649,8 @@ export async function loadConfigurationForEnv(context: $TSContext, env: string, 
     awsConfig = loadConfigFromPath(projectConfigInfo.config.awsConfigFilePath);
   }
 
+  awsConfig.endpoint = 'http://localhost:4566';
+  awsConfig.s3ForcePathStyle = true;
   return awsConfig;
 }
 
@@ -799,6 +805,8 @@ export async function getAwsConfig(context: $TSContext): Promise<AwsSdkConfig> {
     };
   }
 
+  resultAWSConfigInfo.endpoint = 'http://localhost:4566';
+  resultAWSConfigInfo.s3ForcePathStyle = true;
   return resultAWSConfigInfo;
 }
 
@@ -830,20 +838,28 @@ async function determineAuthFlow(context: $TSContext, projectConfig?: ProjectCon
   const generalCreds = projectConfig?.configLevel === 'general';
 
   if (generalCreds) {
-    return { type: 'general' };
+    return { type: 'general',
+    endpoint: 'http://localhost:4566',
+    s3ForcePathStyle: true };
   }
 
   if (useProfile && profileName) {
-    return { type: 'profile', profileName };
+    return { type: 'profile', profileName,
+    endpoint: 'http://localhost:4566',
+    s3ForcePathStyle: true };
   }
 
   if (accessKeyId && secretAccessKey && region) {
-    return { type: 'accessKeys', accessKeyId, region, secretAccessKey };
+    return { type: 'accessKeys', accessKeyId, region, secretAccessKey,
+    endpoint: 'http://localhost:4566',
+    s3ForcePathStyle: true };
   }
 
   if (projectConfig?.config?.awsConfigFilePath) {
     const awsConfigInfo = loadConfigFromPath(projectConfig.config.awsConfigFilePath);
-    return { ...awsConfigInfo, type: 'accessKeys' };
+    return { ...awsConfigInfo, type: 'accessKeys' ,
+    endpoint: 'http://localhost:4566',
+    s3ForcePathStyle: true};
   }
 
   let appId: string;
@@ -855,7 +871,9 @@ async function determineAuthFlow(context: $TSContext, projectConfig?: ProjectCon
       if (adminAppConfig.isAdminApp && adminAppConfig.region) {
         region = adminAppConfig.region;
         if (doAdminTokensExist(appId) && projectConfig?.configLevel === 'amplifyAdmin') {
-          return { type: 'admin', appId, region };
+          return { type: 'admin', appId, region,
+          endpoint: 'http://localhost:4566',
+          s3ForcePathStyle: true };
         }
       }
     }
@@ -866,13 +884,17 @@ async function determineAuthFlow(context: $TSContext, projectConfig?: ProjectCon
   if (context?.exeInfo?.inputParams?.yes) {
     if (process.env.AWS_SDK_LOAD_CONFIG) {
       profileName = profileName || process.env.AWS_PROFILE || 'default';
-      return { type: 'profile', profileName };
+      return { type: 'profile', profileName,
+      endpoint: 'http://localhost:4566',
+      s3ForcePathStyle: true };
     } else {
       accessKeyId = accessKeyId || process.env.AWS_ACCESS_KEY_ID;
       secretAccessKey = secretAccessKey || process.env.AWS_SECRET_ACCESS_KEY;
       region = region || resolveRegion();
       if (accessKeyId && secretAccessKey && region) {
-        return { type: 'accessKeys', accessKeyId, region, secretAccessKey };
+        return { type: 'accessKeys', accessKeyId, region, secretAccessKey,
+        endpoint: 'http://localhost:4566',
+        s3ForcePathStyle: true };
       }
     }
   }
@@ -888,9 +910,13 @@ async function determineAuthFlow(context: $TSContext, projectConfig?: ProjectCon
 
   const authType = await askAuthType(adminAppConfig?.isAdminApp);
   if (authType === 'admin') {
-    return { type: authType, appId, region };
+    return { type: authType, appId, region,
+      endpoint: 'http://localhost:4566',
+      s3ForcePathStyle: true };
   }
-  return { type: authType };
+  return { type: authType,
+    endpoint: 'http://localhost:4566',
+    s3ForcePathStyle: true };
 }
 
 async function askAuthType(isAdminAvailable: boolean = false): Promise<AuthFlow> {

@@ -259,15 +259,27 @@ async function getBackendEnv(context, amplifyClient, amplifyApp) {
         nextToken: listEnvResponse.nextToken,
       },
     ])();
-    listEnvResponse = await amplifyClient
-      .listBackendEnvironments({
-        appId: amplifyApp.appId,
-        nextToken: listEnvResponse.nextToken,
-      })
-      .promise();
 
-    backendEnvs = backendEnvs.concat(listEnvResponse.backendEnvironments);
-  } while (listEnvResponse.nextToken);
+    // listEnvResponse = await amplifyClient
+    //   .listBackendEnvironments({
+    //     appId: amplifyApp.appId,
+    //     nextToken: listEnvResponse.nextToken,
+    //   })
+    //   .promise();
+
+    // backendEnvs = backendEnvs.concat(listEnvResponse.backendEnvironments);
+    // console.log(JSON.stringify(backendEnvs, null, 2));
+
+    //
+    const getEnvResponse = await amplifyClient
+    .getBackendEnvironment({
+      appId: amplifyApp.appId,
+      environmentName: 'integtest'
+    })
+    .promise();
+    console.log("getEnvResponse", getEnvResponse)
+    backendEnvs = [getEnvResponse.backendEnvironment]
+  } while (false && listEnvResponse.nextToken);
 
   if (backendEnvs.length > 1) {
     const options = [];

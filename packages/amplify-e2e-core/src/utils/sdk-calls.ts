@@ -20,14 +20,18 @@ import * as path from 'path';
 import _ from 'lodash';
 
 export const getDDBTable = async (tableName: string, region: string) => {
-  const service = new DynamoDB({ region });
+  const service = new DynamoDB({ region
+    , endpoint: 'http://localhost:4566'
+   });
   if (tableName) {
     return await service.describeTable({ TableName: tableName }).promise();
   }
 };
 
 export const checkIfBucketExists = async (bucketName: string, region: string) => {
-  const service = new S3({ region });
+  const service = new S3({ region
+    , endpoint: 'http://localhost:4566'
+   });
   return await service.headBucket({ Bucket: bucketName }).promise();
 };
 
@@ -137,7 +141,9 @@ export const getMFAConfiguration = async (
 };
 
 export const getLambdaFunction = async (functionName: string, region: string) => {
-  const lambda = new Lambda({ region });
+  const lambda = new Lambda({ region
+    , endpoint: 'http://localhost:4566'
+   });
   try {
     return await lambda.getFunction({ FunctionName: functionName }).promise();
   } catch (e) {
@@ -146,7 +152,9 @@ export const getLambdaFunction = async (functionName: string, region: string) =>
 };
 
 export const getUserPoolClients = async (userPoolId: string, clientIds: string[], region: string) => {
-  const provider = new CognitoIdentityServiceProvider({ region });
+  const provider = new CognitoIdentityServiceProvider({ region
+    , endpoint: 'http://localhost:4566'
+   });
   const res = [];
   try {
     for (let i = 0; i < clientIds.length; i++) {
@@ -165,67 +173,93 @@ export const getUserPoolClients = async (userPoolId: string, clientIds: string[]
 };
 
 export const getBot = async (botName: string, region: string) => {
-  const service = new LexModelBuildingService({ region });
+  const service = new LexModelBuildingService({ region
+    , endpoint: 'http://localhost:4566'
+   });
   return await service.getBot({ name: botName, versionOrAlias: '$LATEST' }).promise();
 };
 
 export const getFunction = async (functionName: string, region: string) => {
-  const service = new Lambda({ region });
+  const service = new Lambda({ region
+    , endpoint: 'http://localhost:4566'
+   });
   return await service.getFunction({ FunctionName: functionName }).promise();
 };
 
 export const getLayerVersion = async (functionArn: string, region: string) => {
-  const service = new Lambda({ region });
+  const service = new Lambda({ region
+    , endpoint: 'http://localhost:4566'
+   });
   return await service.getLayerVersionByArn({ Arn: functionArn }).promise();
 };
 
 export const listVersions = async (layerName: string, region: string) => {
-  const service = new Lambda({ region });
+  const service = new Lambda({ region
+    , endpoint: 'http://localhost:4566'
+   });
   return await service.listLayerVersions({ LayerName: layerName }).promise();
 };
 
 export const invokeFunction = async (functionName: string, payload: string, region: string) => {
-  const service = new Lambda({ region });
+  const service = new Lambda({ region
+    , endpoint: 'http://localhost:4566'
+   });
   return await service.invoke({ FunctionName: functionName, Payload: payload }).promise();
 };
 
 export const getCollection = async (collectionId: string, region: string) => {
-  const service = new Rekognition({ region });
+  const service = new Rekognition({ region
+    , endpoint: 'http://localhost:4566'
+   });
   return await service.describeCollection({ CollectionId: collectionId }).promise();
 };
 
 export const getTable = async (tableName: string, region: string) => {
-  const service = new DynamoDB({ region });
+  const service = new DynamoDB({ region
+    , endpoint: 'http://localhost:4566'
+   });
   return await service.describeTable({ TableName: tableName }).promise();
 };
 
 export const getEventSourceMappings = async (functionName: string, region: string) => {
-  const service = new Lambda({ region });
+  const service = new Lambda({ region
+    , endpoint: 'http://localhost:4566'
+   });
   return (await service.listEventSourceMappings({ FunctionName: functionName }).promise()).EventSourceMappings;
 };
 
 export const deleteTable = async (tableName: string, region: string) => {
-  const service = new DynamoDB({ region });
+  const service = new DynamoDB({ region
+    , endpoint: 'http://localhost:4566'
+   });
   return await service.deleteTable({ TableName: tableName }).promise();
 };
 
 export const putItemInTable = async (tableName: string, region: string, item: unknown) => {
-  const ddb = new DynamoDB.DocumentClient({ region });
+  const ddb = new DynamoDB.DocumentClient({ region
+    , endpoint: 'http://localhost:4566'
+   });
   return await ddb.put({ TableName: tableName, Item: item }).promise();
 };
 
 export const scanTable = async (tableName: string, region: string) => {
-  const ddb = new DynamoDB.DocumentClient({ region });
+  const ddb = new DynamoDB.DocumentClient({ region
+    , endpoint: 'http://localhost:4566'
+   });
   return await ddb.scan({ TableName: tableName }).promise();
 };
 
 export const getAppSyncApi = async (appSyncApiId: string, region: string) => {
-  const service = new AppSync({ region });
+  const service = new AppSync({ region
+    , endpoint: 'http://localhost:4566'
+   });
   return await service.getGraphqlApi({ apiId: appSyncApiId }).promise();
 };
 
 export const getCloudWatchLogs = async (region: string, logGroupName: string, logStreamName: string | undefined = undefined) => {
-  const cloudwatchlogs = new CloudWatchLogs({ region, retryDelayOptions: { base: 500 } });
+  const cloudwatchlogs = new CloudWatchLogs({ region
+    , endpoint: 'http://localhost:4566'
+    , retryDelayOptions: { base: 500 } });
 
   let targetStreamName = logStreamName;
   if (targetStreamName === undefined) {
@@ -244,14 +278,20 @@ export const getCloudWatchLogs = async (region: string, logGroupName: string, lo
 };
 
 export const describeCloudFormationStack = async (stackName: string, region: string, profileConfig?: any) => {
-  const service = profileConfig ? new CloudFormation(profileConfig) : new CloudFormation({ region });
+  const service = profileConfig ? new CloudFormation({...profileConfig
+    , endpoint: 'http://localhost:4566'
+  }) : new CloudFormation({ region
+  , endpoint: 'http://localhost:4566'
+ });
   return (await service.describeStacks({ StackName: stackName }).promise()).Stacks.find(
     stack => stack.StackName === stackName || stack.StackId === stackName,
   );
 };
 
 export const getNestedStackID = async (stackName: string, region: string, logicalId: string): Promise<string> => {
-  const cfnClient = new CloudFormation({ region });
+  const cfnClient = new CloudFormation({ region
+    , endpoint: 'http://localhost:4566'
+   });
   const resource = await cfnClient.describeStackResources({ StackName: stackName, LogicalResourceId: logicalId }).promise();
   return resource?.StackResources?.[0].PhysicalResourceId ?? null;
 };
@@ -265,7 +305,9 @@ export const getNestedStackID = async (stackName: string, region: string, logica
  */
 
 export const getTableResourceId = async (region: string, table: string, StackId: string): Promise<string | null> => {
-  const cfnClient = new CloudFormation({ region });
+  const cfnClient = new CloudFormation({ region
+    , endpoint: 'http://localhost:4566'
+   });
   const apiResources = await cfnClient
     .describeStackResources({
       StackName: StackId,
@@ -283,7 +325,9 @@ export const getTableResourceId = async (region: string, table: string, StackId:
 };
 
 export const putKinesisRecords = async (data: string, partitionKey: string, streamName: string, region: string) => {
-  const kinesis = new Kinesis({ region });
+  const kinesis = new Kinesis({ region
+    , endpoint: 'http://localhost:4566'
+   });
 
   return await kinesis
     .putRecords({
@@ -314,13 +358,17 @@ export const getCloudWatchEventRule = async (targetName: string, region: string)
 };
 
 export const setupAmplifyAdminUI = async (appId: string, region: string) => {
-  const amplifyBackend = new AmplifyBackend({ region });
+  const amplifyBackend = new AmplifyBackend({ region
+    , endpoint: 'http://localhost:4566'
+   });
 
   return await amplifyBackend.createBackendConfig({ AppId: appId }).promise();
 };
 
 export const getAmplifyBackendJobStatus = async (jobId: string, appId: string, envName: string, region: string) => {
-  const amplifyBackend = new AmplifyBackend({ region });
+  const amplifyBackend = new AmplifyBackend({ region
+    , endpoint: 'http://localhost:4566'
+  });
 
   return await amplifyBackend
     .getBackendJob({
@@ -332,22 +380,30 @@ export const getAmplifyBackendJobStatus = async (jobId: string, appId: string, e
 };
 
 export const listRolePolicies = async (roleName: string, region: string) => {
-  const service = new IAM({ region });
+  const service = new IAM({ region
+    , endpoint: 'http://localhost:4566'
+  });
   return (await service.listRolePolicies({ RoleName: roleName }).promise()).PolicyNames;
 };
 
 export const listAttachedRolePolicies = async (roleName: string, region: string) => {
-  const service = new IAM({ region });
+  const service = new IAM({ region
+    , endpoint: 'http://localhost:4566'
+  });
   return (await service.listAttachedRolePolicies({ RoleName: roleName }).promise()).AttachedPolicies;
 };
 
 export const getPermissionsBoundary = async (roleName: string, region) => {
-  const iamClient = new IAM({ region });
+  const iamClient = new IAM({ region
+    , endpoint: 'http://localhost:4566'
+   });
   return (await iamClient.getRole({ RoleName: roleName }).promise())?.Role?.PermissionsBoundary?.PermissionsBoundaryArn;
 };
 
 export const getSSMParameters = async (region: string, appId: string, envName: string, funcName: string, parameterNames: string[]) => {
-  const ssmClient = new SSM({ region });
+  const ssmClient = new SSM({ region
+    , endpoint: 'http://localhost:4566'
+   });
   if (!parameterNames || parameterNames.length === 0) {
     throw new Error('no parameterNames specified');
   }
@@ -360,14 +416,18 @@ export const getSSMParameters = async (region: string, appId: string, envName: s
 };
 //Amazon location service calls
 export const getMap = async (mapName: string, region: string) => {
-  const service = new Location({region});
+  const service = new Location({region
+    , endpoint: 'http://localhost:4566'
+  });
   return await service.describeMap({
     MapName: mapName
   }).promise()
 }
 
 export const getPlaceIndex = async (placeIndexName: string, region: string) => {
-  const service = new Location({region});
+  const service = new Location({region
+    , endpoint: 'http://localhost:4566'
+  });
   return await service.describePlaceIndex({
     IndexName: placeIndexName
   }).promise()

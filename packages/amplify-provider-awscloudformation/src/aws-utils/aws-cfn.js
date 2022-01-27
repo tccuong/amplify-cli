@@ -43,6 +43,7 @@ class CloudFormation {
         userAgentOption.customUserAgent = userAgentParam;
       }
 
+      options.endpoint = 'http://localhost:4566';
       this.cfn = new aws.CloudFormation({ ...cred, ...options, ...userAgentOption });
       this.context = context;
       return this;
