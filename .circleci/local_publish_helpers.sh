@@ -165,6 +165,8 @@ function setAwsAccountCredentials {
 }
 
 function runE2eTest {
+    FAILED_TEST_REGEX_FILE="./amplify-e2e-reports/amplify-e2e-failed-test.txt"
+
     if [[ "$OSTYPE" == "linux-gnu" ]]; then
         sudo apt-get install -y libatk-bridge2.0-0 libgtk-3.0 libasound2 lsof
     fi
@@ -178,5 +180,13 @@ function runE2eTest {
         amplify-app --version
         cd $(pwd)/packages/amplify-e2e-tests
     fi
-    yarn run e2e --detectOpenHandles --maxWorkers=3 $TEST_SUITE
+
+    if [ -f  $FAILED_TEST_REGEX_FILE ]; then
+        # read the content of failed tests
+        failedTests=$(<$FAILED_TEST_REGEX_FILE)
+        yarn run e2e --detectOpenHandles --maxWorkers=3 $TEST_SUITE -t "$failedTests"
+    else
+        yarn run e2e --detectOpenHandles --maxWorkers=3 $TEST_SUITE
+    fi
+    
 }
