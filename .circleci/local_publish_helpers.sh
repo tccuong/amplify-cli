@@ -97,11 +97,21 @@ function retry {
     SLEEP_DURATION=5
     FIRST_RUN=true
     n=0
+    FAILED_TEST_REGEX_FILE="./amplify-e2e-reports/amplify-e2e-failed-test.txt"
+    rm -f $FAILED_TEST_REGEX_FILE
     until [ $n -ge $MAX_ATTEMPTS ]
     do
         echo "Attempting $@ with max retries $MAX_ATTEMPTS"
         setAwsAccountCredentials
-        "$@" && break
+        if [ -f  $FAILED_TEST_REGEX_FILE ]; then
+            # read the content of failed tests
+            faileTests=$(<$FAILED_TEST_REGEX_FILE)
+            cmd="$@ -t \"$faileTests\""
+            eval ${cmd} && break
+        else
+            # is it is not exist then it will be printed
+            "$@" && break
+        fi
         n=$[$n+1]
         FIRST_RUN=false
         echo "Attempt $n completed."
