@@ -1,6 +1,7 @@
 import { DirectiveWrapper, InvalidDirectiveError, TransformerPluginBase } from '@aws-amplify/graphql-transformer-core';
 import {
   FieldMapEntry,
+  TransformerAuthProvider,
   TransformerContextProvider,
   TransformerPrepareStepContextProvider,
   TransformerSchemaVisitStepContextProvider,
@@ -25,7 +26,6 @@ import { ManyToManyDirectiveConfiguration, ManyToManyRelation } from './types';
 import { registerManyToManyForeignKeyMappings, validateModelDirective } from './utils';
 import { makeQueryConnectionWithKeyResolver, updateTableForConnection } from './resolvers';
 import { ensureHasManyConnectionField, extendTypeWithConnection, getPartitionKeyField } from './schema';
-import { AuthTransformer } from '@aws-amplify/graphql-auth-transformer';
 import { ModelTransformer } from '@aws-amplify/graphql-model-transformer';
 import { IndexTransformer } from '@aws-amplify/graphql-index-transformer';
 import { HasOneTransformer } from './graphql-has-one-transformer';
@@ -42,13 +42,13 @@ export class ManyToManyTransformer extends TransformerPluginBase {
   private modelTransformer: ModelTransformer;
   private indexTransformer: IndexTransformer;
   private hasOneTransformer: HasOneTransformer;
-  private authTransformer: AuthTransformer;
+  private authTransformer: TransformerAuthProvider;
 
   constructor(
     modelTransformer: ModelTransformer,
     indexTransformer: IndexTransformer,
     hasOneTransformer: HasOneTransformer,
-    authTransformer: AuthTransformer,
+    authTransformer: TransformerAuthProvider,
   ) {
     super('amplify-many-to-many-transformer', directiveDefinition);
     this.modelTransformer = modelTransformer;
@@ -188,7 +188,7 @@ export class ManyToManyTransformer extends TransformerPluginBase {
       this.hasOneTransformer.field(joinType, d2Field, d2HasOneDirective, context);
 
       if (joinTableAuthDirective) {
-        this.authTransformer.object(joinType, joinTableAuthDirective, context);
+        this.authTransformer.object!(joinType, joinTableAuthDirective, context);
       }
 
       // because of @mapsTo, we need to create a joinType object that matches the original before calling the indexTransformer.
