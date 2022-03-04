@@ -1,13 +1,14 @@
-import { StudioTemplateRendererManager, StudioTemplateRendererFactory, StudioTemplateRenderer, FrameworkOutputManager, RenderTextComponentResponse } from '@aws-amplify/codegen-ui-old';
 import {
-  AmplifyRenderer,
-  ReactThemeStudioTemplateRenderer,
-  ModuleKind,
-  ScriptTarget,
-  ScriptKind,
-} from '@aws-amplify/codegen-ui-react-old';
+  StudioTemplateRendererManager,
+  StudioTemplateRendererFactory,
+  StudioComponent,
+  StudioTemplateRenderer,
+  FrameworkOutputManager,
+  RenderTextComponentResponse,
+} from '@aws-amplify/codegen-ui-old';
+import { AmplifyRenderer, ReactThemeStudioTemplateRenderer, ModuleKind, ScriptTarget, ScriptKind } from '@aws-amplify/codegen-ui-react-old';
 
-import {StudioComponent as StudioComponentNew, StudioTheme} from '@aws-amplify/codegen-ui-new';
+import { StudioComponent as StudioComponentNew, StudioTheme } from '@aws-amplify/codegen-ui-new';
 import { getUiBuilderComponentsPath } from './getUiBuilderComponentsPath';
 import { printer } from 'amplify-prompts';
 import { $TSContext } from 'amplify-cli-core';
@@ -21,15 +22,23 @@ const config = {
 };
 
 const isUpdatedSchema = (schema: StudioComponentNew) => {
-  return schema.schemaVersion && schema.schemaVersion === '1.0'
-}
+  return schema.schemaVersion && schema.schemaVersion === '1.0';
+};
 
 export const createUiBuilderComponent = (context: $TSContext, schema: StudioComponentNew) => {
   if (isUpdatedSchema(schema)) {
     return createUiBuilderComponentNew(context, schema);
   }
   const uiBuilderComponentsPath = getUiBuilderComponentsPath(context);
-  const rendererFactory = new StudioTemplateRendererFactory((component: StudioComponentNew) => new AmplifyRenderer(component, config) as unknown as StudioTemplateRenderer<unknown, StudioComponentNew, FrameworkOutputManager<unknown>, RenderTextComponentResponse>);
+  const rendererFactory = new StudioTemplateRendererFactory(
+    (component: StudioComponentNew) =>
+      new AmplifyRenderer(component as StudioComponent, config) as unknown as StudioTemplateRenderer<
+        unknown,
+        StudioComponentNew,
+        FrameworkOutputManager<unknown>,
+        RenderTextComponentResponse
+      >,
+  );
 
   const outputPathDir = uiBuilderComponentsPath;
 
@@ -43,7 +52,15 @@ export const createUiBuilderComponent = (context: $TSContext, schema: StudioComp
 
 export const createUiBuilderTheme = (context: $TSContext, schema: StudioTheme) => {
   const uiBuilderComponentsPath = getUiBuilderComponentsPath(context);
-  const rendererFactory = new StudioTemplateRendererFactory((component: StudioTheme) => new ReactThemeStudioTemplateRenderer(component, config) as unknown as StudioTemplateRenderer<unknown, StudioTheme, FrameworkOutputManager<unknown>, RenderTextComponentResponse>);
+  const rendererFactory = new StudioTemplateRendererFactory(
+    (component: StudioTheme) =>
+      new ReactThemeStudioTemplateRenderer(component, config) as unknown as StudioTemplateRenderer<
+        unknown,
+        StudioTheme,
+        FrameworkOutputManager<unknown>,
+        RenderTextComponentResponse
+      >,
+  );
 
   const outputPathDir = uiBuilderComponentsPath;
 
@@ -64,7 +81,15 @@ export const createUiBuilderTheme = (context: $TSContext, schema: StudioTheme) =
 
 export const generateAmplifyUiBuilderIndexFile = (context: $TSContext, schemas: StudioComponentNew[]) => {
   const uiBuilderComponentsPath = getUiBuilderComponentsPath(context);
-  const rendererFactory = new StudioTemplateRendererFactory((component: StudioComponentNew[]) => new ReactIndexStudioTemplateRenderer(component, config) as unknown as StudioTemplateRenderer<unknown, StudioComponentNew[], FrameworkOutputManager<unknown>, RenderTextComponentResponse>);
+  const rendererFactory = new StudioTemplateRendererFactory(
+    (component: StudioComponentNew[]) =>
+      new ReactIndexStudioTemplateRenderer(component, config) as unknown as StudioTemplateRenderer<
+        unknown,
+        StudioComponentNew[],
+        FrameworkOutputManager<unknown>,
+        RenderTextComponentResponse
+      >,
+  );
 
   const outputPathDir = uiBuilderComponentsPath;
 
@@ -78,4 +103,5 @@ export const generateAmplifyUiBuilderIndexFile = (context: $TSContext, schemas: 
     printer.debug(e);
     printer.debug('Failed to generate component index file');
     throw e;
-  }};
+  }
+};
