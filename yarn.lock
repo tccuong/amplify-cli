@@ -108,7 +108,6 @@
     yup "^0.32.11"
 
 "@aws-amplify/codegen-ui-old@npm:@aws-amplify/codegen-ui@1.2.0", "@aws-amplify/codegen-ui@1.2.0":
-  name "@aws-amplify/codegen-ui"
   version "1.2.0"
   resolved "https://registry.npmjs.org/@aws-amplify/codegen-ui/-/codegen-ui-1.2.0.tgz#30b865eef7451d7cc8d1ae648f7d95638d9209f4"
   integrity sha512-UKULRKpQG8ABLNjEiLyGoR01PeDli90AbiX/z9RoyVntoyAqWIorYsZcvDh5kb5xhQySU/Rp9cKmZxbJqoxtcQ==
