@@ -32,7 +32,7 @@ export const createUiBuilderComponent = (context: $TSContext, schema: StudioComp
   const uiBuilderComponentsPath = getUiBuilderComponentsPath(context);
   const rendererFactory = new StudioTemplateRendererFactory(
     (component: StudioComponentNew) =>
-      new AmplifyRenderer(component as StudioComponent, config) as unknown as StudioTemplateRenderer<
+      new AmplifyRenderer(component as StudioComponentNew, config) as unknown as StudioTemplateRenderer<
         unknown,
         StudioComponentNew,
         FrameworkOutputManager<unknown>,
