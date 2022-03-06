@@ -21,20 +21,20 @@ const config = {
   renderTypeDeclarations: true,
 };
 
-const isUpdatedSchema = (schema: StudioComponentNew) => {
-  return schema.schemaVersion && schema.schemaVersion === '1.0';
+const isUpdatedSchema = (schema: StudioComponent) => {
+  return (schema as unknown as StudioComponentNew).schemaVersion && (schema as unknown as StudioComponentNew).schemaVersion === '1.0';
 };
 
-export const createUiBuilderComponent = (context: $TSContext, schema: StudioComponentNew) => {
+export const createUiBuilderComponent = (context: $TSContext, schema: StudioComponent) => {
   if (isUpdatedSchema(schema)) {
-    return createUiBuilderComponentNew(context, schema);
+    return createUiBuilderComponentNew(context, schema as unknown as StudioComponentNew);
   }
   const uiBuilderComponentsPath = getUiBuilderComponentsPath(context);
   const rendererFactory = new StudioTemplateRendererFactory(
-    (component: StudioComponentNew) =>
-      new AmplifyRenderer(component as StudioComponentNew, config) as unknown as StudioTemplateRenderer<
+    (component: StudioComponent) =>
+      new AmplifyRenderer(component as StudioComponent, config) as unknown as StudioTemplateRenderer<
         unknown,
-        StudioComponentNew,
+        StudioComponent,
         FrameworkOutputManager<unknown>,
         RenderTextComponentResponse
       >,
