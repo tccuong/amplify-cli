@@ -3,7 +3,6 @@ import { DefaultValueTransformer } from '@aws-amplify/graphql-default-value-tran
 import { FunctionTransformer } from '@aws-amplify/graphql-function-transformer';
 import { HttpTransformer } from '@aws-amplify/graphql-http-transformer';
 import { IndexTransformer, PrimaryKeyTransformer } from '@aws-amplify/graphql-index-transformer';
-import { MapsToTransformer } from '@aws-amplify/graphql-maps-to-transformer';
 import { ModelTransformer } from '@aws-amplify/graphql-model-transformer';
 import { PredictionsTransformer } from '@aws-amplify/graphql-predictions-transformer';
 import {
@@ -15,14 +14,14 @@ import {
 import { SearchableModelTransformer } from '@aws-amplify/graphql-searchable-transformer';
 import {
   collectDirectivesByTypeNames,
-  DeploymentResources,
   getAppSyncServiceExtraDirectives,
   GraphQLTransform,
   ResolverConfig,
   TransformerProjectConfig,
 } from '@aws-amplify/graphql-transformer-core';
 import { Template } from '@aws-amplify/graphql-transformer-core/lib/config/project-config';
-import { OverrideConfig } from '@aws-amplify/graphql-transformer-core/lib/transformation/types';
+import { MapsToTransformer } from '@aws-amplify/graphql-maps-to-transformer';
+import { DeploymentResources, OverrideConfig } from '@aws-amplify/graphql-transformer-core/lib/transformation/types';
 import { AppSyncAuthConfiguration, TransformerPluginProvider } from '@aws-amplify/graphql-transformer-interfaces';
 import {
   $TSAny,
@@ -30,7 +29,9 @@ import {
   $TSObject,
   AmplifyCategories,
   AmplifySupportedService,
+  FeatureFlags,
   getGraphQLTransformerAuthDocLink,
+  getGraphQLTransformerOpenSearchProductionDocLink,
   JSONUtilities,
   pathManager,
   stateManager,
@@ -38,15 +39,13 @@ import {
 import { printer } from 'amplify-prompts';
 import fs from 'fs-extra';
 import { print } from 'graphql';
-import { ResourceConstants } from 'graphql-transformer-common';
 import { getSanityCheckRules, loadProject } from 'graphql-transformer-core';
 import importFrom from 'import-from';
 import importGlobal from 'import-global';
 import _ from 'lodash';
 import path from 'path';
+import { ResourceConstants } from 'graphql-transformer-common/lib/ResourceConstants';
 import { destructiveUpdatesFlag, ProviderName } from '../constants';
-/* eslint-disable-next-line import/no-cycle */
-import { getTransformerVersion, searchablePushChecks } from '../transform-graphql-schema';
 import { hashDirectory } from '../upload-appsync-files';
 import { AmplifyCLIFeatureFlagAdapter } from '../utils/amplify-cli-feature-flag-adapter';
 import { isAuthModeUpdated } from '../utils/auth-mode-compare';
@@ -95,9 +94,9 @@ const getTransformerFactory = (
     new PredictionsTransformer(options?.storageConfig),
     new PrimaryKeyTransformer(),
     indexTransformer,
-    new BelongsToTransformer(),
     new HasManyTransformer(),
     hasOneTransformer,
+    new BelongsToTransformer(),
     new ManyToManyTransformer(modelTransformer, indexTransformer, hasOneTransformer, authTransformer),
     new DefaultValueTransformer(),
     authTransformer,
@@ -138,7 +137,7 @@ const getTransformerFactory = (
 
           try {
             importedModule = importFrom(projectNodeModules, modulePath);
-          } catch {
+          } catch (ignore) {
             // Intentionally left blank to try global
           }
 
@@ -181,8 +180,7 @@ const getTransformerFactory = (
 /**
  * Transform GraphQL Schema
  */
-export const transformGraphQLSchema = async (context: $TSContext, options): Promise<DeploymentResources|undefined> => {
-  let resourceName: string;
+export const transformGraphQLSchema = async (context, options): Promise<DeploymentResources | undefined> => {
   const backEndDir = pathManager.getBackendDirPath();
   const flags = context.parameters.options;
   if (flags['no-gql-override']) {
@@ -212,7 +210,7 @@ export const transformGraphQLSchema = async (context: $TSContext, options): Prom
     resources = resources.concat(allResources);
   }
   resources = resources.filter(resource => resource.service === 'AppSync');
-
+  let resourceName: string;
   if (!resourceDir) {
     // There can only be one appsync resource
     if (resources.length > 0) {
@@ -414,6 +412,7 @@ place .graphql files in a directory at ${schemaDirPath}`);
     JSONUtilities.writeJson(parametersFilePath, parameters);
   }
 
+  // eslint-disable-next-line consistent-return
   return transformerOutput;
 };
 
@@ -441,7 +440,7 @@ const getPreviousDeploymentRootKey = async (previouslyDeployedBackendDir: string
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /**
- * Get the Directive definitions
+ * Transform GraphQL Schema
  */
 export const getDirectiveDefinitions = async (context: $TSContext, resourceDir: string): Promise<string> => {
   const transformList = await getTransformerFactory(resourceDir)({ addSearchableTransformer: true, authConfig: {} });
@@ -452,6 +451,7 @@ export const getDirectiveDefinitions = async (context: $TSContext, resourceDir: 
 
   return [appSynDirectives, transformDirectives].join('\n');
 };
+
 /* eslint-enable @typescript-eslint/no-unused-vars */
 
 /**
@@ -532,7 +532,7 @@ export type ProjectOptions<T> = {
 /**
  * buildAPIProject
  */
-export const buildAPIProject = async (opts: ProjectOptions<TransformerFactoryArgs>): Promise<DeploymentResources|undefined> => {
+export const buildAPIProject = async (opts: ProjectOptions<TransformerFactoryArgs>): Promise<DeploymentResources | undefined> => {
   const schema = opts.projectConfig.schema.toString();
   // Skip building the project if the schema is blank
   if (!schema) {
@@ -553,6 +553,7 @@ export const buildAPIProject = async (opts: ProjectOptions<TransformerFactoryArg
   // TODO: update local env on api compile
   // await _updateCurrentMeta(opts);
 
+  // eslint-disable-next-line consistent-return
   return builtProject;
 };
 
@@ -585,4 +586,68 @@ const _buildProject = async (opts: ProjectOptions<TransformerFactoryArgs>): Prom
   const transformOutput = transform.transform(schema);
 
   return mergeUserConfigWithTransformOutput(userProjectConfig, transformOutput, opts);
+};
+
+/**
+ * searchablePushChecks
+ */
+export const searchablePushChecks = async (context, map, apiName): Promise<void> => {
+  const searchableModelTypes = Object.keys(map).filter(type => map[type].includes('searchable') && map[type].includes('model'));
+  if (searchableModelTypes.length) {
+    const currentEnv = context.amplify.getEnvInfo().envName;
+    const teamProviderInfo = stateManager.getTeamProviderInfo();
+    const instanceType = _.get(
+      teamProviderInfo,
+      [currentEnv, 'categories', 'api', apiName, ResourceConstants.PARAMETERS.ElasticsearchInstanceType],
+      't2.small.elasticsearch',
+    );
+    if (instanceType === 't2.small.elasticsearch' || instanceType === 't3.small.elasticsearch') {
+      const version = await getTransformerVersion(context);
+      const docLink = getGraphQLTransformerOpenSearchProductionDocLink(version);
+      printer.warn(
+        `Your instance type for OpenSearch is ${instanceType}, you may experience performance issues or data loss. Consider reconfiguring with the instructions here ${docLink}`,
+      );
+    }
+  }
+};
+
+/**
+ * getTransformerVersion
+ */
+export const getTransformerVersion = async (context): Promise<number> => {
+  const useExperimentalPipelineTransformer = FeatureFlags.getBoolean('graphQLTransformer.useExperimentalPipelinedTransformer');
+  let transformerVersion;
+  if (useExperimentalPipelineTransformer === false) {
+    transformerVersion = 1;
+  } else {
+    await migrateToTransformerVersionFeatureFlag(context);
+
+    transformerVersion = FeatureFlags.getNumber('graphQLTransformer.transformerVersion');
+    if (transformerVersion !== 1 && transformerVersion !== 2) {
+      throw new Error(`Invalid value specified for transformerVersion: '${transformerVersion}'`);
+    }
+  }
+
+  return transformerVersion;
+};
+
+const migrateToTransformerVersionFeatureFlag = async (context): Promise<void> => {
+  const projectPath = pathManager.findProjectRoot() ?? process.cwd();
+
+  const config = stateManager.getCLIJSON(projectPath, undefined, {
+    throwIfNotExist: false,
+    preserveComments: true,
+  });
+
+  const useExperimentalPipelineTransformer = FeatureFlags.getBoolean('graphQLTransformer.useExperimentalPipelinedTransformer');
+  const transformerVersion = FeatureFlags.getNumber('graphQLTransformer.transformerVersion');
+
+  if (useExperimentalPipelineTransformer && transformerVersion === 1) {
+    config.features.graphqltransformer.transformerversion = 2;
+    stateManager.setCLIJSON(projectPath, config);
+    await FeatureFlags.reloadValues();
+    context.print.warning(
+      `\nThe project is configured with 'transformerVersion': ${transformerVersion}, but 'useExperimentalPipelinedTransformer': ${useExperimentalPipelineTransformer}. Setting the 'transformerVersion': ${config.features.graphqltransformer.transformerversion}. 'useExperimentalPipelinedTransformer' is deprecated.`,
+    );
+  }
 };
