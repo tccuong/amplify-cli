@@ -891,9 +891,8 @@ workflows:
             - e2e-test-context
             - npm-publish
           requires:
-            # - test
-            # - mock_e2e_tests
-            - build
+            - test
+            - mock_e2e_tests
             - graphql_e2e_tests
             - integration_test
             - amplify_e2e_tests_pkg
