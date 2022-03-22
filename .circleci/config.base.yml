@@ -547,10 +547,12 @@ jobs:
       - run:
           name: Check deployed version
           command: |
+            source .circleci/local_publish_helpers.sh
+            changeSudoNpmGlobalPath
             cd packages/amplify-cli
             VERSION=$(npm version | grep @aws-amplify/cli | cut -d ":" -f2 | cut -d "'" -f2 | xargs echo -n)
-            npm i -g @aws-amplify/cli@$VERSION
-            amplify --version
+            sudo npm install -g @aws-amplify/cli@$VERSION
+            amplify version
       - run: *scan_e2e_test_artifacts
   github_prerelease:
     <<: *linux-e2e-executor
