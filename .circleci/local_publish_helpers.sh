@@ -21,6 +21,9 @@ function setNpmTag {
                 export NPM_TAG="${CIRCLE_BRANCH/tagged-release\//}"
             fi
         fi
+        if [[ "$CIRCLE_BRANCH" == "beta" ]]; then
+            export NPM_TAG="beta"
+        fi
     fi
 }
 
@@ -31,13 +34,20 @@ function uploadPkgCli {
     sudo apt-get update
     sudo apt-get install -y sudo tcl expect zip lsof jq groff python python-pip libpython-dev
     sudo pip install awscli
+    if [ "0" -ne "$(aws s3 ls aws s3 cp amplify-pkg-linux s3://pkg-cli-ci-do-not-delete/$(echo $version)/amplify-pkg-linux-$(echo $hash) | wc -l)" ]; then
+        echo "Cannot overwrite existing file at s3://pkg-cli-ci-do-not-delete/$(echo $version)/amplify-pkg-linux-$(echo $hash)"
+        exit 1
+    fi
     aws s3 cp amplify-pkg-win.exe s3://pkg-cli-ci-do-not-delete/$(echo $version)/amplify-pkg-win-$(echo $hash).exe && aws s3 cp amplify-pkg-macos s3://pkg-cli-ci-do-not-delete/$(echo $version)/amplify-pkg-macos-$(echo $hash) && aws s3 cp amplify-pkg-linux s3://pkg-cli-ci-do-not-delete/$(echo $version)/amplify-pkg-linux-$(echo $hash)
-
     if [ -z "$NPM_TAG" ]; then
         exit 0
     fi
 
     echo "Tag name is $NPM_TAG. Uploading to s3://pkg-cli-ci-do-not-delete/$(echo $version)"
+    if [ "0" -ne "$(aws s3 ls s3://pkg-cli-ci-do-not-delete/$(echo $version)/amplify-pkg-linux | wc -l)" ]; then
+        echo "Cannot overwrite existing file at s3://pkg-cli-ci-do-not-delete/$(echo $version)/amplify-pkg-linux"
+        exit 1
+    fi
     aws s3 cp amplify-pkg-win.exe s3://pkg-cli-ci-do-not-delete/$(echo $version)/amplify-pkg-win.exe && aws s3 cp amplify-pkg-macos s3://pkg-cli-ci-do-not-delete/$(echo $version)/amplify-pkg-macos && aws s3 cp amplify-pkg-linux s3://pkg-cli-ci-do-not-delete/$(echo $version)/amplify-pkg-linux
     cd ..
 }

@@ -525,16 +525,22 @@ jobs:
             yarn yarn-use-bash
             source .circleci/local_publish_helpers.sh
             setNpmTag
-            yarn update-versions --preid=$NPM_TAG --conventional-prerelease
+            if [ -z $NPM_TAG ]; then
+              yarn update-versions --preid=$NPM_TAG --conventional-prerelease
+            else
+              yarn update-versions
+            fi
             startLocalRegistry "$(pwd)/.circleci/verdaccio.yaml"
             setNpmRegistryUrlToLocal
             git config user.email not@used.com
             git config user.name "Doesnt Matter"
             changeNpmGlobalPath
             yarn yarn-use-bash
+            yarn dev-build
             yarn pkg-all
             unsetNpmRegistryUrl
             git stash
+            git stash drop
             uploadPkgCli
             ./out/amplify-pkg-linux --version
       - run:
@@ -544,15 +550,6 @@ jobs:
           name: Publish Amplify CLI
           command: |
             bash ./.circleci/publish.sh
-      - run:
-          name: Check deployed version
-          command: |
-            source .circleci/local_publish_helpers.sh
-            changeSudoNpmGlobalPath
-            cd packages/amplify-cli
-            VERSION=$(npm version | grep @aws-amplify/cli | cut -d ":" -f2 | cut -d "'" -f2 | xargs echo -n)
-            sudo npm install -g @aws-amplify/cli@$VERSION
-            amplify version
       - run: *scan_e2e_test_artifacts
   github_prerelease:
     <<: *linux-e2e-executor
