@@ -391,7 +391,9 @@ export class AuthTransformer extends TransformerAuthBase implements TransformerA
       });
 
       roleDefinitions.forEach(role => {
-        this.addFieldResolverForDynamicAuth(context, def, modelName, role.entity);
+        if (role.strategy === 'owner') {
+          this.addFieldResolverForDynamicAuth(context, def, modelName, role.entity);
+        }
       });
     });
 
