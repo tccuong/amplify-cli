@@ -29,7 +29,7 @@ export const getField = (
 export const featureFlags: FeatureFlagProvider = {
   getBoolean: (value: string): boolean => {
     if (value === 'useSubUsernameForDefaultIdentityClaim') {
-      return true;
+      return false;
     }
     return false;
   },

@@ -299,7 +299,7 @@ test('owner fields on primaryKey create auth filter for scan operation', () => {
           return true;
         }
         if (name === 'useSubUsernameForDefaultIdentityClaim') {
-          return true;
+          return false;
         }
         return defaultValue;
       }),
@@ -370,7 +370,7 @@ test('@auth on relational schema with LSI and GSI', () => {
           return false;
         }
         if (name === 'useSubUsernameForDefaultIdentityClaim') {
-          return true;
+          return false;
         }
         return defaultValue;
       }),
@@ -418,7 +418,7 @@ test('@auth on schema with LSI and GSI', () => {
           return false;
         }
         if (name === 'useSubUsernameForDefaultIdentityClaim') {
-          return true;
+          return false;
         }
         return defaultValue;
       }),
