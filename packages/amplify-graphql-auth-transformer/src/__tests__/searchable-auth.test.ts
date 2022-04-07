@@ -1,9 +1,12 @@
-import { AuthTransformer, SEARCHABLE_AGGREGATE_TYPES } from '../';
 import { ModelTransformer } from '@aws-amplify/graphql-model-transformer';
 import { SearchableModelTransformer } from '@aws-amplify/graphql-searchable-transformer';
 import { GraphQLTransform } from '@aws-amplify/graphql-transformer-core';
 import { AppSyncAuthConfiguration } from '@aws-amplify/graphql-transformer-interfaces';
-import { DocumentNode, ObjectTypeDefinitionNode, Kind, FieldDefinitionNode, parse, InputValueDefinitionNode } from 'graphql';
+import {
+  DocumentNode, ObjectTypeDefinitionNode, Kind, FieldDefinitionNode, parse,
+} from 'graphql';
+import { AuthTransformer, SEARCHABLE_AGGREGATE_TYPES } from '..';
+import { featureFlags } from './test-helpers';
 
 const getObjectType = (doc: DocumentNode, type: string): ObjectTypeDefinitionNode | undefined => {
   return doc.definitions.find(def => def.kind === Kind.OBJECT_TYPE_DEFINITION && def.name.value === type) as
@@ -47,6 +50,7 @@ test('auth logic is enabled on owner/static rules in es request', () => {
   const transformer = new GraphQLTransform({
     authConfig,
     transformers: [new ModelTransformer(), new SearchableModelTransformer(), new AuthTransformer()],
+    featureFlags,
   });
   const out = transformer.transform(validSchema);
   // expect response resolver to contain auth logic for owner rule

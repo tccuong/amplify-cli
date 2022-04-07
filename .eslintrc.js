@@ -197,6 +197,7 @@ module.exports = {
     'build',
     '__mocks__',
     'coverage',
+    'packages',
 
     // Forked package
     'amplify-velocity-template',

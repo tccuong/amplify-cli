@@ -1,8 +1,11 @@
-import { AuthTransformer } from '../graphql-auth-transformer';
 import { ModelTransformer } from '@aws-amplify/graphql-model-transformer';
 import { GraphQLTransform } from '@aws-amplify/graphql-transformer-core';
 import { AppSyncAuthConfiguration, AppSyncAuthConfigurationOIDCEntry, AppSyncAuthMode } from '@aws-amplify/graphql-transformer-interfaces';
-import { DocumentNode, ObjectTypeDefinitionNode, Kind, FieldDefinitionNode, parse, InputValueDefinitionNode } from 'graphql';
+import {
+  DocumentNode, ObjectTypeDefinitionNode, Kind, FieldDefinitionNode, parse, InputValueDefinitionNode,
+} from 'graphql';
+import { AuthTransformer } from '../graphql-auth-transformer';
+import { featureFlags } from './test-helpers';
 
 const userPoolsDefaultConfig: AppSyncAuthConfiguration = {
   defaultAuthentication: {
@@ -163,11 +166,11 @@ const getRecursiveSchemaWithDiffModesOnParentType = (authDir1: string, authDir2:
   `;
 };
 
-const getTransformer = (authConfig: AppSyncAuthConfiguration) =>
-  new GraphQLTransform({
-    authConfig,
-    transformers: [new ModelTransformer(), new AuthTransformer()],
-  });
+const getTransformer = (authConfig: AppSyncAuthConfiguration): GraphQLTransform => new GraphQLTransform({
+  authConfig,
+  transformers: [new ModelTransformer(), new AuthTransformer()],
+  featureFlags,
+});
 
 const getObjectType = (doc: DocumentNode, type: string): ObjectTypeDefinitionNode | undefined => {
   return doc.definitions.find(def => def.kind === Kind.OBJECT_TYPE_DEFINITION && def.name.value === type) as

@@ -20,13 +20,13 @@ import {
   ifElse,
 } from 'graphql-mapping-template';
 import {
-  getOwnerClaim,
   getIdentityClaimExp,
   getInputFields,
   emptyPayload,
   setHasAuthExpression,
   iamCheck,
   iamAdminRoleCheckExpression,
+  generateOwnerClaimExpression,
 } from './helpers';
 import {
   API_KEY_AUTH_TYPE,
@@ -161,7 +161,8 @@ const dynamicRoleExpression = (roles: Array<RoleDefinition>, fields: ReadonlyArr
           not(ref(IS_AUTHORIZED_FLAG)),
           compoundExpression([
             set(ref(`ownerEntity${idx}`), methodCall(ref('util.defaultIfNull'), ref(`ctx.args.input.${role.entity!}`), nul())),
-            set(ref(`ownerClaim${idx}`), getOwnerClaim(role.claim!)),
+            // get the claims here and join them and equal to ownerClaim
+            generateOwnerClaimExpression(role.claim!, idx),
             set(ref(`ownerAllowedFields${idx}`), raw(JSON.stringify(role.allowedFields))),
             set(ref(`isAuthorizedOnAllFields${idx}`), bool(role.areAllFieldsAllowed)),
             ...(entityIsList
@@ -175,11 +176,13 @@ const dynamicRoleExpression = (roles: Array<RoleDefinition>, fields: ReadonlyArr
               ]
               : [
                 iff(
+                  // owner equals the entity so must be stored as sub:username
                   equals(ref(`ownerClaim${idx}`), ref(`ownerEntity${idx}`)),
                   addAllowedFieldsIfElse(`ownerAllowedFields${idx}`, `isAuthorizedOnAllFields${idx}`),
                 ),
               ]),
             iff(
+              // not set and does not contain key
               and([ref(`util.isNull($ownerEntity${idx})`), not(methodCall(ref('ctx.args.input.containsKey'), str(role.entity!)))]),
               compoundExpression([
                 qref(

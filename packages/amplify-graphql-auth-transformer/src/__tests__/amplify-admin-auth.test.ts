@@ -1,7 +1,8 @@
-import { AuthTransformer } from '../graphql-auth-transformer';
+import _ from 'lodash';
 import { ModelTransformer } from '@aws-amplify/graphql-model-transformer';
 import { GraphQLTransform } from '@aws-amplify/graphql-transformer-core';
-import _ from 'lodash';
+import { AuthTransformer } from '../graphql-auth-transformer';
+import { featureFlags } from './test-helpers';
 
 const ADMIN_UI_ROLES = ['us-fake-1_uuid_Full-access/CognitoIdentityCredentials', 'us-fake-1_uuid_Manage-only/CognitoIdentityCredentials'];
 
@@ -224,10 +225,10 @@ test('Test simple model with private IAM auth rule, few operations, and amplify 
       ],
     },
     transformers: [
-      new ModelTransformer(), 
-      new AuthTransformer( {
+      new ModelTransformer(),
+      new AuthTransformer({
         identityPoolId: 'testIdentityPoolId',
-      })
+      }),
     ],
   });
   const out = transformer.transform(validSchema);
@@ -334,6 +335,7 @@ test('admin roles should be return the field name inside field resolvers', () =>
         adminRoles: ADMIN_UI_ROLES,
       }),
     ],
+    featureFlags,
   });
   const out = transformer.transform(validSchema);
   expect(out).toBeDefined();
