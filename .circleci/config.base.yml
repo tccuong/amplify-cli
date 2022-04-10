@@ -975,6 +975,7 @@ commands:
             - run:
                 name: Run E2e Tests
                 command: |
+                  sudo apt-get install openjdk-11-jdk
                   source .circleci/local_publish_helpers.sh
                   source $BASH_ENV
                   amplify version
