@@ -20,13 +20,13 @@ import {
   ifElse,
 } from 'graphql-mapping-template';
 import {
-  getOwnerClaim,
   getIdentityClaimExp,
   getInputFields,
   emptyPayload,
   setHasAuthExpression,
   iamCheck,
   iamAdminRoleCheckExpression,
+  generateOwnerClaimExpression,
 } from './helpers';
 import {
   API_KEY_AUTH_TYPE,
@@ -161,7 +161,7 @@ const dynamicRoleExpression = (roles: Array<RoleDefinition>, fields: ReadonlyArr
           not(ref(IS_AUTHORIZED_FLAG)),
           compoundExpression([
             set(ref(`ownerEntity${idx}`), methodCall(ref('util.defaultIfNull'), ref(`ctx.args.input.${role.entity!}`), nul())),
-            set(ref(`ownerClaim${idx}`), getOwnerClaim(role.claim!)),
+            generateOwnerClaimExpression(role.claim!, idx),
             set(ref(`ownerAllowedFields${idx}`), raw(JSON.stringify(role.allowedFields))),
             set(ref(`isAuthorizedOnAllFields${idx}`), bool(role.areAllFieldsAllowed)),
             ...(entityIsList
