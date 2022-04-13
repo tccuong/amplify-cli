@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.8.0-ic-changes-release.0](https://github.com/aws-amplify/amplify-cli/compare/@aws-amplify/graphql-relational-transformer@0.7.11...@aws-amplify/graphql-relational-transformer@0.8.0-ic-changes-release.0) (2022-04-13)
+
+
+### Features
+
+* support multiclaim auth with searchable ([5f6f1c9](https://github.com/aws-amplify/amplify-cli/commit/5f6f1c9ce8c9077b3be6248e1799351561e1859b))
+
+
+
+
+
 ## [0.7.11](https://github.com/aws-amplify/amplify-cli/compare/@aws-amplify/graphql-relational-transformer@0.7.10...@aws-amplify/graphql-relational-transformer@0.7.11) (2022-04-07)
 
 **Note:** Version bump only for package @aws-amplify/graphql-relational-transformer
