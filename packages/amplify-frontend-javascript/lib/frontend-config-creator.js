@@ -287,9 +287,10 @@ async function getCurrentAWSExports(context) {
   if (fs.existsSync(targetFilePath)) {
     // if packaged, we can't load an ES6 module because pkg doesn't support it yet
     // eslint-disable-next-line spellcheck/spell-checker
-    const es5export = `module.exports = {default: awsmobile};${os.EOL}`;
+    const es5export = 'module.exports = {default: awsmobile};\n';
     // eslint-disable-next-line spellcheck/spell-checker
-    const es6export = `export default awsmobile;${os.EOL}`;
+    const es6export = 'export default awsmobile;\n';
+
     const fileContents = fs.readFileSync(targetFilePath, 'utf-8');
     fs.writeFileSync(targetFilePath, fileContents.replace(es6export, es5export));
     // eslint-disable-next-line global-require, import/no-dynamic-require
@@ -690,4 +691,6 @@ function getGeofenceCollectionConfig(geofenceCollectionResources) {
   return geofenceCollectionConfig;
 }
 
-module.exports = { createAWSExports, getAWSExports, createAmplifyConfig, deleteAmplifyConfig, generateAwsExportsAtPath, getAWSExportsObject };
+module.exports = {
+  createAWSExports, getAWSExports, createAmplifyConfig, deleteAmplifyConfig, generateAwsExportsAtPath, getAWSExportsObject,
+};
