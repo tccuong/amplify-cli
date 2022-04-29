@@ -12,7 +12,6 @@ import {
   $TSAny,
   $TSContext,
   $TSMeta,
-  $TSObject,
   AmplifyCategories,
   AmplifySupportedService,
   getGraphQLTransformerAuthDocLink,
@@ -27,11 +26,10 @@ import { DiffRule, getSanityCheckRules, loadProject, ProjectRule, sanityCheckPro
 import _ from 'lodash';
 import path from 'path';
 import { destructiveUpdatesFlag, ProviderName } from '../constants';
-import { getTransformerFactoryV2 } from '../graphql-transformer-factory/transformer-factory';
+import { getTransformerFactory } from '../graphql-transformer-factory/transformer-factory';
 import { getTransformerVersion } from '../graphql-transformer-factory/transformer-version';
-/* eslint-disable-next-line import/no-cycle */
-import { searchablePushChecks } from './api-utils';
-import { hashDirectory } from '../upload-appsync-files';
+import { searchablePushChecks, warnOnAuth } from './api-utils';
+import { hashDirectory, ROOT_APPSYNC_S3_KEY } from '../upload-appsync-files';
 import { AmplifyCLIFeatureFlagAdapter } from '../utils/amplify-cli-feature-flag-adapter';
 import { isAuthModeUpdated } from '../utils/auth-mode-compare';
 import { schemaHasSandboxModeEnabled, showGlobalSandboxModeWarning, showSandboxModePrompts } from '../utils/sandbox-mode-helpers';
@@ -39,28 +37,11 @@ import { parseUserDefinedSlots } from './user-defined-slots';
 import {
   getAdminRoles, getIdentityPoolId, mergeUserConfigWithTransformOutput, writeDeploymentToDisk,
 } from './utils';
-
-const PARAMETERS_FILENAME = 'parameters.json';
-const SCHEMA_FILENAME = 'schema.graphql';
-const SCHEMA_DIR_NAME = 'schema';
-const ROOT_APPSYNC_S3_KEY = 'amplify-appsync-files';
+import { getBucketName, getPreviousDeploymentRootKey, getProjectBucket, PARAMETERS_FILENAME, SCHEMA_DIR_NAME, SCHEMA_FILENAME } from './provider-utils';
 
 type SanityCheckRules = {
   diffRules: DiffRule[];
   projectRules: ProjectRule[];
-};
-
-const warnOnAuth = (map: $TSObject, docLink: string): void => {
-  const unAuthModelTypes = Object.keys(map).filter(type => !map[type].includes('auth') && map[type].includes('model'));
-  if (unAuthModelTypes.length) {
-    printer.info(
-      `
-⚠️  WARNING: Some types do not have authorization rules configured. That means all create, read, update, and delete operations are denied on these types:`,
-      'yellow',
-    );
-    printer.info(unAuthModelTypes.map(type => `\t - ${type}`).join('\n'), 'yellow');
-    printer.info(`Learn more about "@auth" authorization rules here: ${docLink}`, 'yellow');
-  }
 };
 
 /**
@@ -183,7 +164,7 @@ export const transformGraphQLSchemaV2 = async (context: $TSContext, options): Pr
 
   // for the predictions directive get storage config
   const s3Resource = s3ResourceAlreadyExists();
-  const storageConfig = s3Resource ? getBucketName(s3Resource) : undefined;
+  const storageConfig = s3Resource ? getBucketName(context, s3Resource) : undefined;
 
   const buildDir = path.normalize(path.join(resourceDir, 'build'));
   const schemaFilePath = path.normalize(path.join(resourceDir, SCHEMA_FILENAME));
@@ -193,7 +174,7 @@ export const transformGraphQLSchemaV2 = async (context: $TSContext, options): Pr
     const deploymentSubKey = await hashDirectory(resourceDir);
     deploymentRootKey = `${ROOT_APPSYNC_S3_KEY}/${deploymentSubKey}`;
   }
-  const projectBucket = options.dryRun ? 'fake-bucket' : getProjectBucket();
+  const projectBucket = options.dryRun ? 'fake-bucket' : getProjectBucket(context);
   const buildParameters = {
     ...parameters,
     S3DeploymentBucket: projectBucket,
@@ -222,12 +203,12 @@ export const transformGraphQLSchemaV2 = async (context: $TSContext, options): Pr
   if (showSandboxModeMessage) {
     showGlobalSandboxModeWarning(docLink);
   } else {
-    warnOnAuth(directiveMap.types, docLink);
+    await warnOnAuth(context, directiveMap.types);
   }
 
   searchablePushChecks(context, directiveMap.types, parameters[ResourceConstants.PARAMETERS.AppSyncApiName]);
 
-  const transformerListFactory = getTransformerFactoryV2(resourceDir);
+  const transformerListFactory = getTransformerFactory(context, resourceDir);
 
   if (sandboxModeEnabled && options.promptApiKeyCreation) {
     const apiKeyConfig = await showSandboxModePrompts(context);
@@ -264,7 +245,7 @@ export const transformGraphQLSchemaV2 = async (context: $TSContext, options): Pr
     resolverConfig = project.config.ResolverConfig;
   }
 
-  const buildConfig: ProjectOptions<TransformerFactoryArgs> = {
+  const buildConfig: ProjectOptions = {
     ...options,
     buildParameters,
     projectDirectory: resourceDir,
@@ -302,28 +283,6 @@ place .graphql files in a directory at ${schemaDirPath}`);
   return transformerOutput;
 };
 
-const getProjectBucket = (): string => {
-  const meta: $TSMeta = stateManager.getMeta(undefined, { throwIfNotExist: false });
-  const projectBucket = meta?.providers ? meta.providers[ProviderName].DeploymentBucketName : '';
-  return projectBucket;
-};
-
-const getPreviousDeploymentRootKey = async (previouslyDeployedBackendDir: string): Promise<string|undefined> => {
-  // this is the function
-  let parameters;
-  try {
-    const parametersPath = path.join(previouslyDeployedBackendDir, `build/${PARAMETERS_FILENAME}`);
-    const parametersExists = fs.existsSync(parametersPath);
-    if (parametersExists) {
-      const parametersString = await fs.readFile(parametersPath);
-      parameters = JSON.parse(parametersString.toString());
-    }
-    return parameters.S3DeploymentRootKey;
-  } catch (err) {
-    return undefined;
-  }
-};
-
 /**
  * Check if storage exists in the project if not return undefined
  */
@@ -348,24 +307,6 @@ const s3ResourceAlreadyExists = (): string | undefined => {
   }
 };
 
-const getBucketName = (s3ResourceName: string): { bucketName: string } => {
-  const amplifyMeta = stateManager.getMeta();
-  const stackName = amplifyMeta.providers.awscloudformation.StackName;
-  const s3ResourcePath = pathManager.getResourceDirectoryPath(undefined, AmplifyCategories.STORAGE, s3ResourceName);
-  const cliInputsPath = path.join(s3ResourcePath, 'cli-inputs.json');
-  let bucketParameters: $TSObject;
-  // get bucketParameters 1st from cli-inputs , if not present, then parameters.json
-  if (fs.existsSync(cliInputsPath)) {
-    bucketParameters = JSONUtilities.readJson(cliInputsPath);
-  } else {
-    bucketParameters = stateManager.getResourceParametersJson(undefined, AmplifyCategories.STORAGE, s3ResourceName);
-  }
-  const bucketName = stackName.startsWith('amplify-')
-    ? `${bucketParameters.bucketName}\${hash}-\${env}`
-    : `${bucketParameters.bucketName}${s3ResourceName}-\${env}`;
-  return { bucketName };
-};
-
 type TransformerFactoryArgs = {
   addSearchableTransformer: boolean;
   authConfig: $TSAny;
@@ -377,14 +318,14 @@ type TransformerFactoryArgs = {
 /**
  * ProjectOptions Type Definition
  */
-type ProjectOptions<T> = {
+type ProjectOptions = {
   buildParameters: {
     S3DeploymentBucket: string;
     S3DeploymentRootKey: string;
   };
   projectDirectory: string;
-  transformersFactory: (options: T) => Promise<TransformerPluginProvider[]>;
-  transformersFactoryArgs: T;
+  transformersFactory: (options: TransformerFactoryArgs) => Promise<TransformerPluginProvider[]>;
+  transformersFactoryArgs: TransformerFactoryArgs;
   rootStackFileName: 'cloudformation-template.json';
   currentCloudBackendDirectory?: string;
   minify: boolean;
@@ -402,7 +343,7 @@ type ProjectOptions<T> = {
 /**
  * buildAPIProject
  */
-const buildAPIProject = async (opts: ProjectOptions<TransformerFactoryArgs>): Promise<DeploymentResources|undefined> => {
+const buildAPIProject = async (opts: ProjectOptions): Promise<DeploymentResources|undefined> => {
   const schema = opts.projectConfig.schema.toString();
   // Skip building the project if the schema is blank
   if (!schema) {
@@ -431,7 +372,7 @@ const buildAPIProject = async (opts: ProjectOptions<TransformerFactoryArgs>): Pr
   return builtProject;
 };
 
-const _buildProject = async (opts: ProjectOptions<TransformerFactoryArgs>): Promise<DeploymentResources> => {
+const _buildProject = async (opts: ProjectOptions): Promise<DeploymentResources> => {
   const userProjectConfig = opts.projectConfig;
   const stackMapping = userProjectConfig.config.StackMapping;
   const userDefinedSlots = {

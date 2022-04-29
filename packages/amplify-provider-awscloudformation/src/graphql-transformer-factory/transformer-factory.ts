@@ -45,16 +45,24 @@ import {
 import importFrom from 'import-from';
 import importGlobal from 'import-global';
 import path from 'path';
+import { getTransformerVersion } from './transformer-version';
 
 type TransformerFactoryArgs = {
-    addSearchableTransformer: boolean;
-    authConfig: $TSAny;
-    storageConfig?: $TSAny;
-    adminRoles?: Array<string>;
-    identityPoolId?: string;
-  };
+  addSearchableTransformer: boolean;
+  authConfig: $TSAny;
+  storageConfig?: $TSAny;
+  adminRoles?: Array<string>;
+  identityPoolId?: string;
+};
 
-export const getTransformerFactoryV2 = (
+export const getTransformerFactory = async (context: $TSContext, resourceDir: string, authConfig?: $TSAny) => {
+  const transformerVersion = await getTransformerVersion(context);
+  return transformerVersion === 2
+    ? getTransformerFactoryV2(resourceDir)
+    : getTransformerFactoryV1(context, resourceDir, authConfig);
+}
+
+const getTransformerFactoryV2 = (
   resourceDir: string,
 ): (options: TransformerFactoryArgs) => Promise<TransformerPluginProviderV2[]> => async (options?: TransformerFactoryArgs) => {
   const modelTransformer = new ModelTransformerV2();
@@ -111,8 +119,8 @@ export const getTransformerFactoryV2 = (
   return transformerList;
 };
 
-export function getTransformerFactoryV1(context: $TSContext, resourceDir: string, authConfig?: $TSAny) {
-  return async (addSearchableTransformer: boolean, storageConfig?: $TSAny) => {
+function getTransformerFactoryV1(context: $TSContext, resourceDir: string, authConfig?: $TSAny) {
+  return async (options: TransformerFactoryArgs) => {
     const transformerList: ITransformer[] = [
       // TODO: Removing until further discussion. `getTransformerOptions(project, '@model')`
       new DynamoDBModelTransformerV1(),
@@ -121,10 +129,10 @@ export function getTransformerFactoryV1(context: $TSContext, resourceDir: string
       new HttpTransformerV1(),
       new KeyTransformerV1(),
       new ModelConnectionTransformerV1(),
-      new PredictionsTransformerV1(storageConfig),
+      new PredictionsTransformerV1(options.storageConfig),
     ];
 
-    if (addSearchableTransformer) {
+    if (options.addSearchableTransformer) {
       transformerList.push(new SearchableModelTransformerV1());
     }
 
@@ -164,7 +172,9 @@ export function getTransformerFactoryV1(context: $TSContext, resourceDir: string
       // if it is not an AmplifyAdmin app, do nothing
     }
 
-    transformerList.push(new ModelAuthTransformerV1({ authConfig, addAwsIamAuthInOutputSchema: amplifyAdminEnabled }));
+    const appliedAuthConfig = authConfig ? authConfig : options.authConfig;
+
+    transformerList.push(new ModelAuthTransformerV1({ authConfig: appliedAuthConfig, addAwsIamAuthInOutputSchema: amplifyAdminEnabled }));
     return transformerList;
   };
 }
