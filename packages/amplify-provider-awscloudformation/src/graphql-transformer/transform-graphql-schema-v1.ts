@@ -2,20 +2,14 @@ import fs from 'fs-extra';
 import path from 'path';
 import chalk from 'chalk';
 import inquirer from 'inquirer';
-import { destructiveUpdatesFlag, ProviderName as providerName } from '../constants';
+import { destructiveUpdatesFlag, ProviderName } from '../constants';
 import { AmplifyCLIFeatureFlagAdapter } from '../utils/amplify-cli-feature-flag-adapter';
 import {
-  $TSContext,
-  AmplifyCategories,
-  getGraphQLTransformerAuthDocLink,
   getGraphQLTransformerAuthSubscriptionsDocLink,
   getGraphQLTransformerOpenSearchProductionDocLink,
   JSONUtilities,
-  pathManager,
-  stateManager,
 } from 'amplify-cli-core';
 import { ResourceConstants } from 'graphql-transformer-common';
-import _ from 'lodash';
 import { isAuthModeUpdated } from '../utils/auth-mode-compare';
 import {
   collectDirectivesByTypeNames,
@@ -24,8 +18,6 @@ import {
   TRANSFORM_CONFIG_FILE_NAME,
   TRANSFORM_BASE_VERSION,
   CLOUDFORMATION_FILE_NAME,
-  revertAPIMigration,
-  migrateAPIProject,
   readProjectConfiguration,
   buildAPIProject,
   getSanityCheckRules,
@@ -33,25 +25,20 @@ import {
 import { hashDirectory } from '../upload-appsync-files';
 import { exitOnNextTick } from 'amplify-cli-core';
 import { getTransformerVersion } from '../graphql-transformer-factory/transformer-version';
-import { getTransformerFactoryV1 } from '../graphql-transformer-factory/transformer-factory';
-import { searchablePushChecks } from './api-utils';
+import { getTransformerFactory } from '../graphql-transformer-factory/transformer-factory';
+import { searchablePushChecks, warnOnAuth } from './api-utils';
+import {
+  getBucketName,
+  getPreviousDeploymentRootKey,
+  getProjectBucket,
+  PARAMETERS_FILENAME,
+  ROOT_APPSYNC_S3_KEY,
+  SCHEMA_DIR_NAME,
+  SCHEMA_FILENAME
+} from './provider-utils';
+import { migrateProject } from './migrate-project';
 
 const apiCategory = 'api';
-const parametersFileName = 'parameters.json';
-const schemaFileName = 'schema.graphql';
-const schemaDirName = 'schema';
-const ROOT_APPSYNC_S3_KEY = 'amplify-appsync-files';
-
-async function warnOnAuth(context, map) {
-  const unAuthModelTypes = Object.keys(map).filter(type => !map[type].includes('auth') && map[type].includes('model'));
-  if (unAuthModelTypes.length) {
-    const transformerVersion = await getTransformerVersion(context);
-    const docLink = getGraphQLTransformerAuthDocLink(transformerVersion);
-    context.print.warning("\nThe following types do not have '@auth' enabled. Consider using @auth with @model");
-    context.print.warning(unAuthModelTypes.map(type => `\t - ${type}`).join('\n'));
-    context.print.info(`Learn more about @auth here: ${docLink}\n`);
-  }
-}
 
 /**
  * @TODO Include a map of versions to keep track
@@ -137,56 +124,6 @@ function apiProjectIsFromOldVersion(pathToProject, resourcesToBeCreated) {
   return fs.existsSync(`${pathToProject}/${CLOUDFORMATION_FILE_NAME}`) && !fs.existsSync(`${pathToProject}/${TRANSFORM_CONFIG_FILE_NAME}`);
 }
 
-/**
- * API migration happens in a few steps. First we calculate which resources need
- * to remain in the root stack (DDB tables, ES Domains, etc) and write them to
- * transform.conf.json. We then call CF's update stack on the root stack such
- * that only the resources that need to be in the root stack remain there
- * (this deletes resolvers from the schema). We then compile the project with
- * the new implementation and call update stack again.
- * @param {*} context
- * @param {*} resourceDir
- */
-async function migrateProject(context, options) {
-  const { resourceDir, isCLIMigration, cloudBackendDirectory } = options;
-  const updateAndWaitForStack = options.handleMigration || (() => Promise.resolve('Skipping update'));
-  let oldProjectConfig;
-  let oldCloudBackend;
-  try {
-    context.print.info('\nMigrating your API. This may take a few minutes.');
-    const { project, cloudBackend } = await migrateAPIProject({
-      projectDirectory: resourceDir,
-      cloudBackendDirectory,
-    });
-    oldProjectConfig = project;
-    oldCloudBackend = cloudBackend;
-    await updateAndWaitForStack({ isCLIMigration });
-  } catch (e) {
-    await revertAPIMigration(resourceDir, oldProjectConfig);
-    throw e;
-  }
-  try {
-    // After the intermediate update, we need the transform function
-    // to look at this directory since we did not overwrite the currentCloudBackend with the build
-    options.cloudBackendDirectory = resourceDir;
-    await transformGraphQLSchemaV1(context, options);
-    const result = await updateAndWaitForStack({ isCLIMigration });
-    context.print.info('\nFinished migrating API.');
-    return result;
-  } catch (e) {
-    context.print.error('Reverting API migration.');
-    await revertAPIMigration(resourceDir, oldCloudBackend);
-    try {
-      await updateAndWaitForStack({ isReverting: true, isCLIMigration });
-    } catch (e) {
-      context.print.error('Error reverting intermediate migration stack.');
-    }
-    await revertAPIMigration(resourceDir, oldProjectConfig);
-    context.print.error('API successfully reverted.');
-    throw e;
-  }
-}
-
 export async function transformGraphQLSchemaV1(context, options) {
   const backEndDir = context.amplify.pathManager.getBackendDirPath();
   const flags = context.parameters.options;
@@ -224,7 +161,7 @@ export async function transformGraphQLSchemaV1(context, options) {
     // There can only be one appsync resource
     if (resources.length > 0) {
       const resource = resources[0];
-      if (resource.providerPlugin !== providerName) {
+      if (resource.providerPlugin !== ProviderName) {
         return;
       }
       const { category, resourceName } = resource;
@@ -239,7 +176,7 @@ export async function transformGraphQLSchemaV1(context, options) {
   if (!previouslyDeployedBackendDir) {
     if (resources.length > 0) {
       const resource = resources[0];
-      if (resource.providerPlugin !== providerName) {
+      if (resource.providerPlugin !== ProviderName) {
         return;
       }
       const { category, resourceName } = resource;
@@ -250,7 +187,7 @@ export async function transformGraphQLSchemaV1(context, options) {
     }
   }
 
-  const parametersFilePath = path.join(resourceDir, parametersFileName);
+  const parametersFilePath = path.join(resourceDir, PARAMETERS_FILENAME);
 
   if (!parameters && fs.existsSync(parametersFilePath)) {
     try {
@@ -330,8 +267,8 @@ export async function transformGraphQLSchemaV1(context, options) {
   };
 
   const buildDir = path.normalize(path.join(resourceDir, 'build'));
-  const schemaFilePath = path.normalize(path.join(resourceDir, schemaFileName));
-  const schemaDirPath = path.normalize(path.join(resourceDir, schemaDirName));
+  const schemaFilePath = path.normalize(path.join(resourceDir, SCHEMA_FILENAME));
+  const schemaDirPath = path.normalize(path.join(resourceDir, SCHEMA_DIR_NAME));
   let deploymentRootKey = await getPreviousDeploymentRootKey(previouslyDeployedBackendDir);
   if (!deploymentRootKey) {
     const deploymentSubKey = await hashDirectory(resourceDir);
@@ -361,13 +298,9 @@ export async function transformGraphQLSchemaV1(context, options) {
 
   await transformerVersionCheck(context, resourceDir, previouslyDeployedBackendDir, resourcesToBeUpdated, directiveMap.directives);
 
-  const transformerListFactory = getTransformerFactoryV1(context, resourceDir, authConfig);
+  const transformerListFactory = await getTransformerFactory(context, resourceDir, authConfig);
 
-  let searchableTransformerFlag = false;
-
-  if (directiveMap.directives.includes('searchable')) {
-    searchableTransformerFlag = true;
-  }
+  const searchableTransformerFlag = directiveMap.directives.includes('searchable');
 
   const ff = new AmplifyCLIFeatureFlagAdapter();
   const allowDestructiveUpdates = context?.input?.options?.[destructiveUpdatesFlag] || context?.input?.options?.force;
@@ -400,28 +333,6 @@ place .graphql files in a directory at ${schemaDirPath}`);
   return transformerOutput;
 }
 
-function getProjectBucket(context) {
-  const projectDetails = context.amplify.getProjectDetails();
-  const projectBucket = projectDetails.amplifyMeta.providers ? projectDetails.amplifyMeta.providers[providerName].DeploymentBucketName : '';
-  return projectBucket;
-}
-
-async function getPreviousDeploymentRootKey(previouslyDeployedBackendDir) {
-  // this is the function
-  let parameters;
-  try {
-    const parametersPath = path.join(previouslyDeployedBackendDir, 'build', parametersFileName);
-    const parametersExists = fs.existsSync(parametersPath);
-    if (parametersExists) {
-      const parametersString = await fs.readFile(parametersPath);
-      parameters = JSON.parse(parametersString.toString());
-    }
-    return parameters.S3DeploymentRootKey;
-  } catch (err) {
-    return undefined;
-  }
-}
-
 // TODO: Remove until further discussion
 // function getTransformerOptions(project, transformerName) {
 //   if (
@@ -442,24 +353,4 @@ async function getPreviousDeploymentRootKey(previouslyDeployedBackendDir) {
 async function invokeS3GetResourceName(context) {
   const s3ResourceName = await context.amplify.invokePluginMethod(context, 'storage', undefined, 's3GetResourceName', [context]);
   return s3ResourceName;
-}
-
-async function getBucketName(context: $TSContext, s3ResourceName: string) {
-  const { amplify } = context;
-  const { amplifyMeta } = amplify.getProjectDetails();
-  const stackName = amplifyMeta.providers.awscloudformation.StackName;
-  const s3ResourcePath = pathManager.getResourceDirectoryPath(undefined, AmplifyCategories.STORAGE, s3ResourceName);
-  const cliInputsPath = path.join(s3ResourcePath, 'cli-inputs.json');
-  let bucketParameters;
-  // get bucketParameters 1st from cli-inputs , if not present, then parameters.json
-  if (fs.existsSync(cliInputsPath)) {
-    bucketParameters = JSONUtilities.readJson(cliInputsPath);
-  } else {
-    bucketParameters = stateManager.getResourceParametersJson(undefined, AmplifyCategories.STORAGE, s3ResourceName);
-  }
-
-  const bucketName = stackName.startsWith('amplify-')
-    ? `${bucketParameters.bucketName}\${hash}-\${env}`
-    : `${bucketParameters.bucketName}${s3ResourceName}-\${env}`;
-  return bucketName;
 }
