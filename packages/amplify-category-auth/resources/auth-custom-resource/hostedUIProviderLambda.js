@@ -1,14 +1,17 @@
 const response = require('cfn-response');
 const aws = require('aws-sdk');
-const identity = new aws.CognitoIdentityServiceProvider();
-exports.handler = (event, context, callback) => {
+exports.handler = async(event, context, callback) => {
   try {
+    const identity = new aws.CognitoIdentityServiceProvider();
+    const ssm = new aws.SSM();
     const userPoolId = event.ResourceProperties.userPoolId;
+    const parameter = await ssm.getParameter({
+    Name: process.env['hostedUIProviderCreds'],
+    WithDecryption: true,
+  }).promise();
+  console.log(parameter);
     let hostedUIProviderMeta = JSON.parse(event.ResourceProperties.hostedUIProviderMeta);
-    let hostedUIProviderCreds = JSON.parse(event.ResourceProperties.hostedUIProviderCreds);
-    if (hostedUIProviderCreds.length === 0) {
-      response.send(event, context, response.SUCCESS, {});
-    }
+    let hostedUIProviderCreds = JSON.parse(parameter.Parameter.Value);
     if (event.RequestType == 'Delete') {
       response.send(event, context, response.SUCCESS, {});
     }

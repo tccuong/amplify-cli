@@ -28,6 +28,7 @@ import { AttributeType, CognitoCLIInputs } from '../service-walkthrough-types/aw
 import * as vm from 'vm2';
 import * as fs from 'fs-extra';
 import os from 'os';
+import { getAppId } from '../auth-secret-manager/secret-name';
 
 export class AmplifyAuthTransform extends AmplifyCategoryTransform {
   private _app: cdk.App;
@@ -154,6 +155,7 @@ export class AmplifyAuthTransform extends AmplifyCategoryTransform {
       breakCircularDependency: FeatureFlags.getBoolean('auth.breakcirculardependency'),
       useEnabledMfas: FeatureFlags.getBoolean('auth.useenabledmfas'),
       dependsOn: [],
+      oAuthSecretsPathAmplifyAppId: getAppId()
     };
 
     // get env secrets
@@ -247,6 +249,7 @@ export class AmplifyAuthTransform extends AmplifyCategoryTransform {
       breakCircularDependency: this._cognitoStackProps.breakCircularDependency,
       useEnabledMfas: this._cognitoStackProps.useEnabledMfas,
       dependsOn: [], // to support undefined meta in update,
+      oAuthSecretsPathAmplifyAppId: getAppId()
     };
 
     // convert triggers to JSON
@@ -528,15 +531,15 @@ export class AmplifyAuthTransform extends AmplifyCategoryTransform {
       }
     }
 
-    if (Object.keys(props).includes('hostedUIProviderMeta') && !Object.keys(props).includes('hostedUIProviderCreds')) {
-      this._authTemplateObj.addCfnParameter(
-        {
-          type: 'String',
-          default: '[]',
-        },
-        'hostedUIProviderCreds',
-      );
-    }
+    // if (Object.keys(props).includes('hostedUIProviderMeta') && !Object.keys(props).includes('hostedUIProviderCreds')) {
+    //   this._authTemplateObj.addCfnParameter(
+    //     {
+    //       type: 'String',
+    //       default: '[]',
+    //     },
+    //     'hostedUIProviderCreds',
+    //   );
+    // }
   };
 
   private addCfnConditions = (props: CognitoStackOptions) => {

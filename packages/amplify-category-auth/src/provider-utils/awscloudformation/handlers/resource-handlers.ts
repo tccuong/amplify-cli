@@ -11,6 +11,7 @@ import { getAddAuthDefaultsApplier, getUpdateAuthDefaultsApplier } from '../util
 import { doesConfigurationIncludeSMS } from '../utils/auth-sms-workflow-helper';
 import { generateAuthStackTemplate } from '../utils/generate-auth-stack-template';
 import { getPostAddAuthMessagePrinter, getPostUpdateAuthMessagePrinter, printSMSSandboxWarning } from '../utils/message-printer';
+import { syncOAuthSecretsToCloud } from '../auth-secret-manager/sync-oauth-secrets';
 import {
   createUserPoolGroups,
   getResourceSynthesizer,
@@ -57,12 +58,13 @@ export const getAddAuthHandler =
     };
 
     context.amplify.saveEnvResourceParameters(context, category, cognitoCLIInputs.cognitoConfig.resourceName, envSpecificParams);
-
     // move this function outside of AddHandler
     try {
       const cliState = new AuthInputState(cognitoCLIInputs.cognitoConfig.resourceName);
       // saving cli-inputs except secrets
       await cliState.saveCLIInputPayload(cognitoCLIInputs);
+      // saving oauth secrets here
+      await syncOAuthSecretsToCloud(context, cognitoCLIInputs.cognitoConfig.resourceName, envSpecificParams);
       // cdk transformation in this function
       // start auth transform here
       await generateAuthStackTemplate(context, cognitoCLIInputs.cognitoConfig.resourceName);
@@ -156,6 +158,8 @@ export const getUpdateAuthHandler = (context: $TSContext) => async (request: Ser
     }
     // saving cli-inputs except secrets
     await cliState.saveCLIInputPayload(cognitoCLIInputs);
+    // updating OAuth secrets
+    await syncOAuthSecretsToCloud(context, cognitoCLIInputs.cognitoConfig.resourceName, envSpecificParams);
     // remoe this when api and functions transform are done
     if (request.updateFlow !== 'updateUserPoolGroups' && request.updateFlow !== 'updateAdminQueries') {
       await generateAuthStackTemplate(context, cognitoCLIInputs.cognitoConfig.resourceName);

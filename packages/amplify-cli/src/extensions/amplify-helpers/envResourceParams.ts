@@ -73,45 +73,20 @@ export function saveEnvResourceParameters(context: $TSContext, category: string,
 
   if (!isMigrationContext(context)) {
     stateManager.setTeamProviderInfo(undefined, teamProviderInfo);
-    // write hostedUIProviderCreds to deploymentSecrets
-    const deploymentSecrets = stateManager.getDeploymentSecrets();
-    const rootStackId = getRootStackId();
-    if (hostedUIProviderCreds) {
-      stateManager.setDeploymentSecrets(
-        mergeDeploymentSecrets({
-          currentDeploymentSecrets: deploymentSecrets,
-          rootStackId,
-          category,
-          envName: currentEnv,
-          keyName: hostedUIProviderCredsField,
-          value: hostedUIProviderCreds,
-          resource,
-        }),
-      );
-    } else {
-      stateManager.setDeploymentSecrets(
-        removeFromDeploymentSecrets({
-          currentDeploymentSecrets: deploymentSecrets,
-          rootStackId,
-          category,
-          resource,
-          envName: currentEnv,
-          keyName: hostedUIProviderCredsField,
-        }),
-      );
-    }
   }
 }
 
 export function loadEnvResourceParameters(context: $TSContext, category: string, resource: string) {
+  //remove deployment secrets and fetch parameters from service
   const envParameters = {
-    ...loadEnvResourceParametersFromDeploymentSecrets(context, category, resource),
+    //...loadEnvResourceParametersFromDeploymentSecrets(context, category, resource),
     ...loadEnvResourceParametersFromTeamproviderInfo(context, category, resource),
   };
   return envParameters;
 }
 
 function loadEnvResourceParametersFromDeploymentSecrets(context: $TSContext, category: string, resource: string) {
+  // Give a context call to auth category to sync secrets and return oAUTH secret obj.
   try {
     const currentEnv = getCurrentEnvName(context);
     const deploymentSecrets = stateManager.getDeploymentSecrets();
