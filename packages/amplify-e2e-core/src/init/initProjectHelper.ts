@@ -26,13 +26,9 @@ const defaultSettings = {
 
 export function initJSProjectWithProfile(cwd: string, settings?: Partial<typeof defaultSettings>): Promise<void> {
   const s = { ...defaultSettings, ...settings };
-  let env;
-
-  if (s.disableAmplifyAppCreation === true) {
-    env = {
-      CLI_DEV_INTERNAL_DISABLE_AMPLIFY_APP_CREATION: '1',
-    };
-  }
+  let env = {
+    CLI_DEV_INTERNAL_DISABLE_AMPLIFY_APP_CREATION: '1',
+  };
 
   addCircleCITags(cwd);
 
