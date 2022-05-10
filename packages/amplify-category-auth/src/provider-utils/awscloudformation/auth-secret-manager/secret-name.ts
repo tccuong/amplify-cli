@@ -1,5 +1,6 @@
 import { stateManager } from 'amplify-cli-core';
 import * as path from 'path';
+import { getAppId } from '../utils/get-app-id';
 
 export const oAuthSecretsPathAmplifyAppIdKey = 'oAuthSecretsPathAmplifyAppId';
 export const oauthObjSecretKey = 'hostedUIProviderCreds';
@@ -28,16 +29,4 @@ export const getEnvSecretPrefix = (envName: string = stateManager.getLocalEnvInf
     throw new Error('Could not determine the current Amplify environment name. Try running `amplify env checkout`.');
   }
   return path.posix.join('/amplify', getAppId(), envName);
-};
-
-/**
- *
- */
-export const getAppId = () : string => {
-  const meta = stateManager.getMeta(undefined, { throwIfNotExist: false });
-  const appId = meta?.providers?.awscloudformation?.AmplifyAppId;
-  if (!appId) {
-    throw new Error('Could not find an Amplify AppId in the amplfiy-meta.json file. Make sure your project is initialized in the cloud.');
-  }
-  return appId;
 };

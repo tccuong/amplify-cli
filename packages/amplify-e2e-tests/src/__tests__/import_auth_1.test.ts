@@ -1,3 +1,5 @@
+/* eslint-disable jest/expect-expect */
+/* eslint-disable max-lines-per-function */
 import { $TSObject, JSONUtilities, stateManager } from 'amplify-cli-core';
 import {
   addApi,
@@ -12,6 +14,7 @@ import {
   deleteProject,
   deleteProjectDir,
   initJSProjectWithProfile,
+  setAmplifyAppIdInBackendAmplifyMeta,
   updateApiSchema,
 } from 'amplify-e2e-core';
 import * as fs from 'fs-extra';
@@ -66,7 +69,7 @@ describe('auth import userpool only', () => {
   let dummyOGSettings: AddAuthUserPoolOnlyWithOAuthSettings;
 
   let projectRoot: string;
-  let ignoreProjectDeleteErrors: boolean = false;
+  let ignoreProjectDeleteErrors = false;
 
   beforeAll(async () => {
     ogProjectRoot = await createNewProjectDir(ogProjectSettings.name);
@@ -74,6 +77,8 @@ describe('auth import userpool only', () => {
     ogSettings = createUserPoolOnlyWithOAuthSettings(ogProjectSettings.name, ogShortId);
 
     await initJSProjectWithProfile(ogProjectRoot, ogProjectSettings);
+    setAmplifyAppIdInBackendAmplifyMeta(ogProjectRoot);
+
     await addAuthUserPoolOnlyWithOAuth(ogProjectRoot, ogSettings);
     await amplifyPushAuth(ogProjectRoot);
 
@@ -84,6 +89,7 @@ describe('auth import userpool only', () => {
     dummyOGSettings = createUserPoolOnlyWithOAuthSettings(dummyOGProjectSettings.name, ogShortId);
 
     await initJSProjectWithProfile(dummyOGProjectRoot, dummyOGProjectSettings);
+    setAmplifyAppIdInBackendAmplifyMeta(dummyOGProjectRoot);
     await addAuthUserPoolOnlyWithOAuth(dummyOGProjectRoot, dummyOGSettings);
     await amplifyPushAuth(dummyOGProjectRoot);
   });

@@ -75,6 +75,7 @@
   "pathname",
   "pipelined",
   "positionally",
+  "posix",
   "postauthorcd",
   "promisify",
   "qref",

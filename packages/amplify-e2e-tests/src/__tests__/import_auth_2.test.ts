@@ -11,6 +11,7 @@ import {
   getAppId,
   initJSProjectWithProfile,
   addS3StorageWithSettings,
+  setAmplifyAppIdInBackendAmplifyMeta,
 } from 'amplify-e2e-core';
 import {
   AuthProjectDetails,
@@ -57,7 +58,7 @@ describe('auth import identity pool and userpool', () => {
   let dummyOGSettings: AddAuthIdentityPoolAndUserPoolWithOAuthSettings;
 
   let projectRoot: string;
-  let ignoreProjectDeleteErrors: boolean = false;
+  let ignoreProjectDeleteErrors = false;
 
   beforeAll(async () => {
     ogProjectRoot = await createNewProjectDir(ogProjectSettings.name);
@@ -65,6 +66,7 @@ describe('auth import identity pool and userpool', () => {
     ogSettings = createIDPAndUserPoolWithOAuthSettings(ogProjectSettings.name, ogShortId);
 
     await initJSProjectWithProfile(ogProjectRoot, ogProjectSettings);
+    setAmplifyAppIdInBackendAmplifyMeta(ogProjectRoot);
     await addAuthIdentityPoolAndUserPoolWithOAuth(ogProjectRoot, ogSettings);
     await amplifyPushAuth(ogProjectRoot);
 
@@ -75,6 +77,7 @@ describe('auth import identity pool and userpool', () => {
     dummyOGSettings = createIDPAndUserPoolWithOAuthSettings(dummyOGProjectSettings.name, ogShortId);
 
     await initJSProjectWithProfile(dummyOGProjectRoot, dummyOGProjectSettings);
+    setAmplifyAppIdInBackendAmplifyMeta(ogProjectRoot);
     await addAuthIdentityPoolAndUserPoolWithOAuth(dummyOGProjectRoot, dummyOGSettings);
     await amplifyPushAuth(dummyOGProjectRoot);
   });
@@ -110,7 +113,7 @@ describe('auth import identity pool and userpool', () => {
     await initJSProjectWithProfile(projectRoot, projectSettings);
     await importIdentityPoolAndUserPool(projectRoot, ogSettings.userPoolName, { native: '_app_client ', web: '_app_clientWeb' });
 
-    let projectDetails = getAuthProjectDetails(projectRoot);
+    const projectDetails = getAuthProjectDetails(projectRoot);
 
     expectAuthProjectDetailsMatch(projectDetails, ogProjectDetails);
 
@@ -199,7 +202,7 @@ describe('auth import identity pool and userpool', () => {
 
     await amplifyPushAuth(projectRoot);
 
-    let projectDetails = getAuthProjectDetails(projectRoot);
+    const projectDetails = getAuthProjectDetails(projectRoot);
 
     const appId = getAppId(projectRoot);
     expect(appId).toBeDefined();

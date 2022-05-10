@@ -47,6 +47,21 @@ function getBackendAmplifyMeta(projectRoot: string) {
   return JSON.parse(fs.readFileSync(metaFilePath, 'utf8'));
 }
 
+function setAmplifyAppIdInBackendAmplifyMeta(projectRoot: string) {
+  const metaFilePath: string = path.join(projectRoot, 'amplify', 'backend', 'amplify-meta.json');
+  const amplifyMeta =  JSON.parse(fs.readFileSync(metaFilePath, 'utf8'));
+  const mockAppID = `mockAmplifyId_${Math.floor(Math.random() * 100000)}`;
+  const updatedAmplifyMeta = {
+    providers:{
+      awscloudformation:{
+        ...amplifyMeta.providers.awscloudformation,
+        AmplifyAppId: mockAppID
+      }
+    }
+  }
+  JSONUtilities.writeJson(metaFilePath, updatedAmplifyMeta);
+}
+
 function getBackendConfig(projectRoot: string) {
   const backendFConfigFilePath: string = path.join(projectRoot, 'amplify', 'backend', 'backend-config.json');
   return JSON.parse(fs.readFileSync(backendFConfigFilePath, 'utf8'));
@@ -202,5 +217,6 @@ export {
   setTeamProviderInfo,
   getLocalEnvInfo,
   getCustomPoliciesPath,
+  setAmplifyAppIdInBackendAmplifyMeta
 };
 /* eslint-enable */
