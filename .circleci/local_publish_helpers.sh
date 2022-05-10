@@ -39,10 +39,25 @@ function uploadPkgCli {
     export version=$(./amplify-pkg-linux-x64 --version)
 
     if [[ "$CIRCLE_BRANCH" == "release" ]] || [[ "$CIRCLE_BRANCH" == "beta" ]] || [[ "$CIRCLE_BRANCH" =~ ^tagged-release ]]; then
-        tar -czvf amplify-pkg-linux-arm64.tgz amplify-pkg-linux-arm64
-        tar -czvf amplify-pkg-linux-x64.tgz amplify-pkg-linux-x64
-        tar -czvf amplify-pkg-macos-x64.tgz amplify-pkg-macos-x64
-        tar -czvf amplify-pkg-win-x64.tgz amplify-pkg-win-x64.exe
+        # linux-arm64
+        openssl dgst -sha512 -binary amplify-pkg-linux-arm64 > message.sha512
+        aws --profile=s3-uploader --region us-east-1 kms sign --key-id alias/s3-sign-verify --message fileb://message.sha512 --message-type DIGEST --signing-algorithm RSASSA_PSS_SHA_512 | jq -r .Signature | base64 --decode > signature-digest.sign
+        tar -czvf amplify-pkg-linux-arm64.tgz amplify-pkg-linux-arm64 signature-digest.sign
+
+        # linux-x64
+        openssl dgst -sha512 -binary amplify-pkg-linux-x64 > message.sha512
+        aws --profile=s3-uploader --region us-east-1 kms sign --key-id alias/s3-sign-verify --message fileb://message.sha512 --message-type DIGEST --signing-algorithm RSASSA_PSS_SHA_512 | jq -r .Signature | base64 --decode > signature-digest.sign
+        tar -czvf amplify-pkg-linux-x64.tgz amplify-pkg-linux-x64 signature-digest.sign
+
+        # macos-x64
+        openssl dgst -sha512 -binary amplify-pkg-macos-x64 > message.sha512
+        aws --profile=s3-uploader --region us-east-1 kms sign --key-id alias/s3-sign-verify --message fileb://message.sha512 --message-type DIGEST --signing-algorithm RSASSA_PSS_SHA_512 | jq -r .Signature | base64 --decode > signature-digest.sign
+        tar -czvf amplify-pkg-macos-x64.tgz amplify-pkg-macos-x64 signature-digest.sign
+
+        # win-x64
+        openssl dgst -sha512 -binary amplify-pkg-win-x64 > message.sha512
+        aws --profile=s3-uploader --region us-east-1 kms sign --key-id alias/s3-sign-verify --message fileb://message.sha512 --message-type DIGEST --signing-algorithm RSASSA_PSS_SHA_512 | jq -r .Signature | base64 --decode > signature-digest.sign
+        tar -czvf amplify-pkg-win-x64.tgz amplify-pkg-win-x64.exe signature-digest.sign
 
         aws --profile=s3-uploader s3 cp amplify-pkg-win-x64.tgz s3://aws-amplify-cli-do-not-delete/$(echo $version)/amplify-pkg-win-x64-$(echo $hash).tgz
         aws --profile=s3-uploader s3 cp amplify-pkg-macos-x64.tgz s3://aws-amplify-cli-do-not-delete/$(echo $version)/amplify-pkg-macos-x64-$(echo $hash).tgz
@@ -60,7 +75,9 @@ function uploadPkgCli {
         aws --profile=s3-uploader s3 cp amplify-pkg-linux-x64.tgz s3://aws-amplify-cli-do-not-delete/$(echo $version)/amplify-pkg-linux-x64.tgz
 
     else
-        tar -czvf amplify-pkg-linux-x64.tgz amplify-pkg-linux-x64
+        openssl dgst -sha512 -binary amplify-pkg-linux-x64 > message.sha512
+        aws --profile=s3-uploader --region us-east-1 kms sign --key-id alias/s3-sign-verify --message fileb://message.sha512 --message-type DIGEST --signing-algorithm RSASSA_PSS_SHA_512 | jq -r .Signature | base64 --decode > signature-digest.sign
+        tar -czvf amplify-pkg-linux-x64.tgz amplify-pkg-linux-x64 signature-digest.sign
         aws --profile=s3-uploader s3 cp amplify-pkg-linux-x64.tgz s3://aws-amplify-cli-do-not-delete/$(echo $version)/amplify-pkg-linux-x64-$(echo $hash).tgz
     fi
 
