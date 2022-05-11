@@ -12,6 +12,7 @@ import {
   deleteProjectDir,
   getProjectMeta,
   initJSProjectWithProfile,
+  setAmplifyAppIdInBackendAmplifyMeta,
 } from 'amplify-e2e-core';
 import {
   addEnvironment,
@@ -26,7 +27,9 @@ import {
 
 async function validate(meta: any) {
   expect(meta.providers.awscloudformation).toBeDefined();
-  const { AuthRoleArn: authRoleArn, DeploymentBucketName: bucketName, Region: region, StackId: stackId } = meta.providers.awscloudformation;
+  const {
+    AuthRoleArn: authRoleArn, DeploymentBucketName: bucketName, Region: region, StackId: stackId,
+  } = meta.providers.awscloudformation;
 
   expect(authRoleArn).toBeDefined();
   expect(region).toBeDefined();
@@ -162,6 +165,7 @@ describe('environment commands with HostedUI params', () => {
   beforeAll(async () => {
     projRoot = await createNewProjectDir('env-test');
     await initJSProjectWithProfile(projRoot, { envName: 'enva' });
+    setAmplifyAppIdInBackendAmplifyMeta(projRoot);
     await addAuthWithDefaultSocial(projRoot, {});
     await amplifyPushAuth(projRoot);
   });

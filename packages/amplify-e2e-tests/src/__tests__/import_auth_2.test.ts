@@ -77,7 +77,7 @@ describe('auth import identity pool and userpool', () => {
     dummyOGSettings = createIDPAndUserPoolWithOAuthSettings(dummyOGProjectSettings.name, ogShortId);
 
     await initJSProjectWithProfile(dummyOGProjectRoot, dummyOGProjectSettings);
-    setAmplifyAppIdInBackendAmplifyMeta(ogProjectRoot);
+    setAmplifyAppIdInBackendAmplifyMeta(dummyOGProjectRoot);
     await addAuthIdentityPoolAndUserPoolWithOAuth(dummyOGProjectRoot, dummyOGSettings);
     await amplifyPushAuth(dummyOGProjectRoot);
   });

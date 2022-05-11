@@ -67,8 +67,8 @@ describe('amplify add auth...', () => {
 
   it('...should init a project where all possible options are selected', async () => {
     await initJSProjectWithProfile(projRoot, defaultsSettings);
-    await addAuthWithMaxOptions(projRoot, {});
     setAmplifyAppIdInBackendAmplifyMeta(projRoot);
+    await addAuthWithMaxOptions(projRoot, {});
     await amplifyPushAuth(projRoot);
     const meta = getProjectMeta(projRoot);
 

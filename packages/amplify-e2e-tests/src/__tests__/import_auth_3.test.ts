@@ -115,7 +115,7 @@ describe('auth import userpool only', () => {
     deleteProjectDir(projectRoot);
   });
 
-  it('imported auth, push, pull to empty directory, files should match', async () => {
+  it.only('imported auth, push, pull to empty directory, files should match', async () => {
     await initJSProjectWithProfile(projectRoot, {
       ...projectSettings,
       disableAmplifyAppCreation: false,
