@@ -39,7 +39,6 @@ export { getLocationSupportedRegion, getLocationRegionMapping } from './aws-util
 import { updateEnv } from './update-env';
 
 import { uploadHooksDirectory } from './utils/hooks-manager';
-import { getTransformerVersion } from './graphql-transformer-factory/transformer-version';
 
 export const cfnRootStackFileName = 'root-cloudformation-stack.json';
 export { storeRootStackTemplate } from './initializer';
@@ -50,6 +49,11 @@ export { rootStackFileName } from './push-resources';
 
 import { compileSchema } from './utility-functions';
 import { LocationService } from './aws-utils/aws-location-service';
+
+/**
+ * Exports for API Category Split
+ */
+export { getTransformerFactory } from './graphql-transformer-factory/transformer-factory';
 
 function init(context) {
   return initializer.run(context);
@@ -190,7 +194,6 @@ module.exports = {
   uploadHooksDirectory,
   getLocationSupportedRegion,
   getLocationRegionMapping,
-  getTransformerVersion,
   transformResourceWithOverrides,
   rootStackFileName,
   compileSchema,

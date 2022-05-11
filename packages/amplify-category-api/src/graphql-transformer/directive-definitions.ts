@@ -5,7 +5,7 @@ import {
   $TSContext,
 } from 'amplify-cli-core';
 import { print } from 'graphql';
-import { getTransformerFactory } from './transformer-factory';
+import { getTransformerFactory } from 'amplify-provider-awscloudformation';
 import { getTransformerVersion } from './transformer-version';
 
 /**
