@@ -1,6 +1,5 @@
 import chalk from 'chalk';
-import { $TSContext } from 'amplify-cli-core';
-import { hasApiKey } from './api-key-helpers';
+import { $TSContext, CloudformationProviderFacade } from 'amplify-cli-core';
 import { printer } from 'amplify-prompts';
 import { parse } from 'graphql';
 
@@ -9,8 +8,13 @@ const AUTHORIZATION_RULE = 'AuthRule';
 const ALLOW = 'allow';
 const PUBLIC = 'public';
 
+async function hasApiKey(context: $TSContext): Promise<boolean> {
+  const apiKeyConfig = await CloudformationProviderFacade.getApiKeyConfig(context);
+  return !!apiKeyConfig && !!apiKeyConfig?.apiKeyExpirationDays;
+}
+
 export async function showSandboxModePrompts(context: $TSContext): Promise<any> {
-  if (!hasApiKey()) {
+  if (!(await hasApiKey(context))) {
     printer.info(
       `
 ⚠️  WARNING: Global Sandbox Mode has been enabled, which requires a valid API key. If
