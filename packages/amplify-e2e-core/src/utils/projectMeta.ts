@@ -62,6 +62,14 @@ function setAmplifyAppIdInBackendAmplifyMeta(projectRoot: string) {
   JSONUtilities.writeJson(metaFilePath, updatedAmplifyMeta);
 }
 
+function unsetAmplifyAppIdInBackendAmplifyMeta(projectRoot: string) {
+  const metaFilePath: string = path.join(projectRoot, 'amplify', 'backend', 'amplify-meta.json');
+  const amplifyMeta =  JSON.parse(fs.readFileSync(metaFilePath, 'utf8'));
+  delete amplifyMeta?.providers?.awscloudformation?.AmplifyAppID;
+  console.log(amplifyMeta);
+  JSONUtilities.writeJson(metaFilePath, amplifyMeta);
+}
+
 function getBackendConfig(projectRoot: string) {
   const backendFConfigFilePath: string = path.join(projectRoot, 'amplify', 'backend', 'backend-config.json');
   return JSON.parse(fs.readFileSync(backendFConfigFilePath, 'utf8'));
@@ -102,6 +110,14 @@ function getTeamProviderInfo(projectRoot: string) {
 function setTeamProviderInfo(projRoot: string, content: unknown) {
   const teamProviderFilePath: string = path.join(projRoot, 'amplify', 'team-provider-info.json');
   JSONUtilities.writeJson(teamProviderFilePath, content);
+}
+
+function unsetAmplifyAppIdInTeamProviderInfo(projectRoot: string) {
+  const teamProviderFilePath: string = path.join(projectRoot, 'amplify', 'team-provider-info.json');
+  const teamProviderInfo =  JSON.parse(fs.readFileSync(teamProviderFilePath, 'utf8'));
+  delete teamProviderInfo?.providers?.awscloudformation?.AmplifyAppID;
+  console.log(teamProviderInfo);
+  JSONUtilities.writeJson(teamProviderFilePath, teamProviderInfo);
 }
 
 function getS3StorageBucketName(projectRoot: string) {
@@ -217,6 +233,8 @@ export {
   setTeamProviderInfo,
   getLocalEnvInfo,
   getCustomPoliciesPath,
-  setAmplifyAppIdInBackendAmplifyMeta
+  setAmplifyAppIdInBackendAmplifyMeta,
+  unsetAmplifyAppIdInBackendAmplifyMeta,
+  unsetAmplifyAppIdInTeamProviderInfo
 };
 /* eslint-enable */

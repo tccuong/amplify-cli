@@ -27,8 +27,8 @@ describe('amplify export backend', () => {
   });
 
   it('init a js project and export', async () => {
-    await initJSProjectWithProfile(projRoot, { envName: 'dev' });
-    setAmplifyAppIdInBackendAmplifyMeta(projRoot);
+    await initJSProjectWithProfile(projRoot, { envName: 'dev', disableAmplifyAppCreation: false});
+    //setAmplifyAppIdInBackendAmplifyMeta(projRoot);
     await addAuthWithMaxOptions(projRoot, {});
     await addApiWithoutSchema(projRoot, { transformerVersion: 1 });
     await addS3StorageWithIdpAuth(projRoot);

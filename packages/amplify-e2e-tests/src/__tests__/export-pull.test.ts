@@ -47,8 +47,8 @@ describe('amplify export pull', () => {
   });
 
   it('init a js project and compare with export pull', async () => {
-    await initJSProjectWithProfile(projRoot, { envName: 'dev' });
-    setAmplifyAppIdInBackendAmplifyMeta(projRoot);
+    await initJSProjectWithProfile(projRoot, { envName: 'dev', disableAmplifyAppCreation: false  });
+    //setAmplifyAppIdInBackendAmplifyMeta(projRoot);
     await AddandPushCategories();
     const exportsPath = getAWSExportsPath(projRoot);
     const pathToExportGeneratedConfig = await generatePullConfig('javascript');
@@ -56,8 +56,8 @@ describe('amplify export pull', () => {
   });
 
   it('init an ios project and compare with export pull', async () => {
-    await initIosProjectWithProfile(projRoot, { envName: 'dev' });
-    setAmplifyAppIdInBackendAmplifyMeta(projRoot);
+    await initIosProjectWithProfile(projRoot, { envName: 'dev', disableAmplifyAppCreation: false });
+    //setAmplifyAppIdInBackendAmplifyMeta(projRoot);
     await AddandPushCategories('ios');
     const awsConfigPath = getAWSConfigIOSPath(projRoot);
     const amplifyConfigPath = getAmplifyConfigIOSPath(projRoot);
@@ -67,8 +67,8 @@ describe('amplify export pull', () => {
   });
 
   it('init an android project and compare with export pull', async () => {
-    await initAndroidProjectWithProfile(projRoot, { envName: 'dev' });
-    setAmplifyAppIdInBackendAmplifyMeta(projRoot);
+    await initAndroidProjectWithProfile(projRoot, { envName: 'dev', disableAmplifyAppCreation: false  });
+    //setAmplifyAppIdInBackendAmplifyMeta(projRoot);
     await AddandPushCategories('android');
     const awsConfigPath = getAWSConfigAndroidPath(projRoot);
     const amplifyConfigPath = getAmplifyConfigAndroidPath(projRoot);

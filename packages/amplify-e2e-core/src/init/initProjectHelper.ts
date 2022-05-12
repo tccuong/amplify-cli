@@ -92,15 +92,20 @@ export function initJSProjectWithProfile(cwd: string, settings?: Partial<typeof 
 export function initAndroidProjectWithProfile(cwd: string, settings: Object): Promise<void> {
   const s = { ...defaultSettings, ...settings };
 
+  let env;
+  if (s.disableAmplifyAppCreation === true) {
+    env = {
+      CLI_DEV_INTERNAL_DISABLE_AMPLIFY_APP_CREATION: '1',
+    };
+  }
+
   addCircleCITags(cwd);
 
   return new Promise((resolve, reject) => {
     spawn(getCLIPath(), ['init'], {
       cwd,
       stripColors: true,
-      env: {
-        CLI_DEV_INTERNAL_DISABLE_AMPLIFY_APP_CREATION: '1',
-      },
+      env,
     })
       .wait('Enter a name for the project')
       .sendLine(s.name)
@@ -140,6 +145,12 @@ export function createRandomName() {
 
 export function initIosProjectWithProfile(cwd: string, settings: Object): Promise<void> {
   const s = { ...defaultSettings, ...settings };
+  let env;
+  if (s.disableAmplifyAppCreation === true) {
+    env = {
+      CLI_DEV_INTERNAL_DISABLE_AMPLIFY_APP_CREATION: '1',
+    };
+  }
 
   addCircleCITags(cwd);
 
@@ -147,9 +158,7 @@ export function initIosProjectWithProfile(cwd: string, settings: Object): Promis
     spawn(getCLIPath(), ['init'], {
       cwd,
       stripColors: true,
-      env: {
-        CLI_DEV_INTERNAL_DISABLE_AMPLIFY_APP_CREATION: '1',
-      },
+      env,
     })
       .wait('Enter a name for the project')
       .sendLine(s.name)
@@ -182,10 +191,17 @@ export function initIosProjectWithProfile(cwd: string, settings: Object): Promis
 export function initFlutterProjectWithProfile(cwd: string, settings: Object): Promise<void> {
   const s = { ...defaultSettings, ...settings };
 
+  let env;
+  if (s.disableAmplifyAppCreation === true) {
+    env = {
+      CLI_DEV_INTERNAL_DISABLE_AMPLIFY_APP_CREATION: '1',
+    };
+  }
+
   addCircleCITags(cwd);
 
   return new Promise((resolve, reject) => {
-    let chain = spawn(getCLIPath(), ['init'], { cwd, stripColors: true })
+    let chain = spawn(getCLIPath(), ['init'], { cwd, stripColors: true , env})
       .wait('Enter a name for the project')
       .sendLine(s.name)
       .wait('Initialize the project with the above configuration?')

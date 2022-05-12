@@ -76,8 +76,8 @@ describe('auth import userpool only', () => {
     ogShortId = getShortId();
     ogSettings = createUserPoolOnlyWithOAuthSettings(ogProjectSettings.name, ogShortId);
 
-    await initJSProjectWithProfile(ogProjectRoot, ogProjectSettings);
-    setAmplifyAppIdInBackendAmplifyMeta(ogProjectRoot);
+    await initJSProjectWithProfile(ogProjectRoot, { ...ogProjectSettings, disableAmplifyAppCreation: false });
+    //setAmplifyAppIdInBackendAmplifyMeta(ogProjectRoot);
 
     await addAuthUserPoolOnlyWithOAuth(ogProjectRoot, ogSettings);
     await amplifyPushAuth(ogProjectRoot);
@@ -88,8 +88,8 @@ describe('auth import userpool only', () => {
     dummyOGShortId = getShortId();
     dummyOGSettings = createUserPoolOnlyWithOAuthSettings(dummyOGProjectSettings.name, ogShortId);
 
-    await initJSProjectWithProfile(dummyOGProjectRoot, dummyOGProjectSettings);
-    setAmplifyAppIdInBackendAmplifyMeta(dummyOGProjectRoot);
+    await initJSProjectWithProfile(dummyOGProjectRoot, { ...dummyOGProjectSettings, disableAmplifyAppCreation: false });
+    //setAmplifyAppIdInBackendAmplifyMeta(dummyOGProjectRoot);
     await addAuthUserPoolOnlyWithOAuth(dummyOGProjectRoot, dummyOGSettings);
     await amplifyPushAuth(dummyOGProjectRoot);
   });

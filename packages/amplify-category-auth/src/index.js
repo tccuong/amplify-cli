@@ -366,8 +366,8 @@ async function initEnv(context) {
     const { resourceName } = authResource;
     return async () => {
       const config = await updateConfigOnEnvInit(context, 'auth', resourceName);
-      await syncOAuthSecretsToCloud(context, resourceName, config);
       context.amplify.saveEnvResourceParameters(context, 'auth', resourceName, config);
+      await syncOAuthSecretsToCloud(context, resourceName, config);
     };
   });
 

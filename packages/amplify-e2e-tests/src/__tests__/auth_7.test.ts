@@ -45,8 +45,8 @@ describe('headless auth', () => {
         name: ogProjectPrefix,
       };
       ogProjectRoot = await createNewProjectDir(ogProjectSettings.name);
-      await initJSProjectWithProfile(ogProjectRoot, ogProjectSettings);
-      setAmplifyAppIdInBackendAmplifyMeta(ogProjectRoot);
+      await initJSProjectWithProfile(ogProjectRoot, { ...ogProjectSettings, disableAmplifyAppCreation: false });
+      //setAmplifyAppIdInBackendAmplifyMeta(ogProjectRoot);
     });
 
     afterEach(async () => {

@@ -51,8 +51,8 @@ describe('amplify updating auth...', () => {
       updatesigninUrl: 'http://localhost:3003/',
       updatesignoutUrl: 'http://localhost:3004/',
     };
-    await initAndroidProjectWithProfile(projRoot, defaultsSettings);
-    setAmplifyAppIdInBackendAmplifyMeta(projRoot);
+    await initAndroidProjectWithProfile(projRoot, { ...defaultsSettings, disableAmplifyAppCreation: false });
+    //setAmplifyAppIdInBackendAmplifyMeta(projRoot);
     await addAuthWithSignInSignOutUrl(projRoot, settings);
     await updateAuthSignInSignOutUrl(projRoot, settings);
   });

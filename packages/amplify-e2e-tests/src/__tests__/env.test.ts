@@ -164,8 +164,8 @@ describe('environment commands with HostedUI params', () => {
   let projRoot: string;
   beforeAll(async () => {
     projRoot = await createNewProjectDir('env-test');
-    await initJSProjectWithProfile(projRoot, { envName: 'enva' });
-    setAmplifyAppIdInBackendAmplifyMeta(projRoot);
+    await initJSProjectWithProfile(projRoot, { envName: 'enva', disableAmplifyAppCreation: false});
+    //setAmplifyAppIdInBackendAmplifyMeta(projRoot);
     await addAuthWithDefaultSocial(projRoot, {});
     await amplifyPushAuth(projRoot);
   });

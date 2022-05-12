@@ -54,8 +54,8 @@ describe('amplify add auth...', () => {
   });
 
   it('...should init a project with only user pool and no identity pool', async () => {
-    await initJSProjectWithProfile(projRoot, defaultsSettings);
-    setAmplifyAppIdInBackendAmplifyMeta(projRoot);
+    await initJSProjectWithProfile(projRoot, { ...defaultsSettings, disableAmplifyAppCreation: false });
+    //setAmplifyAppIdInBackendAmplifyMeta(projRoot);
     await addAuthUserPoolOnly(projRoot, {});
     await amplifyPushAuth(projRoot);
     const meta = getProjectMeta(projRoot);
@@ -66,8 +66,8 @@ describe('amplify add auth...', () => {
   });
 
   it('...should init a project where all possible options are selected', async () => {
-    await initJSProjectWithProfile(projRoot, defaultsSettings);
-    setAmplifyAppIdInBackendAmplifyMeta(projRoot);
+    await initJSProjectWithProfile(projRoot, { ...defaultsSettings, disableAmplifyAppCreation: false });
+    //setAmplifyAppIdInBackendAmplifyMeta(projRoot);
     await addAuthWithMaxOptions(projRoot, {});
     await amplifyPushAuth(projRoot);
     const meta = getProjectMeta(projRoot);

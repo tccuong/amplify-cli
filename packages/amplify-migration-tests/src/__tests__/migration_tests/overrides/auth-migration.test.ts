@@ -142,8 +142,8 @@ describe('amplify auth migration', () => {
       updatesigninUrl: 'http://localhost:3003/',
       updatesignoutUrl: 'http://localhost:3004/',
     };
-    await initAndroidProjectWithProfile(projRoot, defaultSettings);
-    setAmplifyAppIdInBackendAmplifyMeta(projRoot);
+    await initAndroidProjectWithProfile(projRoot, { ...defaultSettings, disableAmplifyAppCreation: false });
+    //setAmplifyAppIdInBackendAmplifyMeta(projRoot);
     await addAuthWithSignInSignOutUrl(projRoot, settings);
 
     const amplifyMeta = getBackendAmplifyMeta(projRoot);
