@@ -18,10 +18,11 @@ interface IUsageMetricsData {
   ) => void;
   startCodePathTimer: (codePath: StartableTimedCodePath) => void;
   stopCodePathTimer: (codePath: StoppableTimedCodePath) => void;
+  calculatePushNormalizationFactor: (events: { StackId: string, PhysicalResourceId: string } [], StackId: string) => void;
 }
 
 /**
- *
+ * Interface for UsageData
  */
 export interface IUsageData extends IUsageMetricsData, IFlowData {
 }
