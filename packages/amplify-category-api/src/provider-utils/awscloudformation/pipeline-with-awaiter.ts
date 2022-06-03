@@ -1,3 +1,5 @@
+/* eslint-disable no-new */
+/* eslint-disable max-classes-per-file */
 import * as codebuild from '@aws-cdk/aws-codebuild';
 import * as codepipeline from '@aws-cdk/aws-codepipeline';
 import * as codepipelineactions from '@aws-cdk/aws-codepipeline-actions';
@@ -20,6 +22,9 @@ type PipelineAwaiterProps = {
   deploymentMechanism: DEPLOYMENT_MECHANISM;
 };
 
+/**
+ *
+ */
 export type GitHubSourceActionInfo = {
   path: string;
   tokenSecretArn: string;
@@ -32,7 +37,9 @@ const lambdasDir = path.resolve(__dirname, '../../../resources/awscloudformation
 
 class PipelineAwaiter extends cdk.Construct {
   constructor(scope: cdk.Construct, id: string, props: PipelineAwaiterProps) {
-    const { pipeline, artifactBucketName, artifactKey, deploymentMechanism } = props;
+    const {
+      pipeline, artifactBucketName, artifactKey, deploymentMechanism,
+    } = props;
 
     const { pipelineArn, pipelineName } = pipeline;
 
@@ -90,6 +97,9 @@ class PipelineAwaiter extends cdk.Construct {
   }
 }
 
+/**
+ *
+ */
 export class PipelineWithAwaiter extends cdk.Construct {
   pipelineName: string;
   constructor(
@@ -251,13 +261,19 @@ export class PipelineWithAwaiter extends cdk.Construct {
                 clusterName: service.cluster,
                 env: {},
               } as ecs.ICluster;
+
               serviceArn = cdk.Fn.ref(service.attrServiceArn);
               serviceName = service.serviceName;
               stack = cdk.Stack.of(this);
-              env = {} as any;
               node = service.node;
+              env = {} as cdk.ResourceEnvironment;
+              applyRemovalPolicy(policy: cdk.RemovalPolicy): void {
+                this.applyRemovalPolicy(policy);
+                // declaring as IBase Service requires it
+              }
             })(this, 'tmpService'),
             input: buildOutput,
+
           }),
         ],
       },
@@ -286,6 +302,9 @@ export class PipelineWithAwaiter extends cdk.Construct {
     new cdk.CfnOutput(scope, 'PipelineName', { value: this.pipelineName });
   }
 
+  /**
+   *
+   */
   getPipelineName(): string {
     return this.pipelineName;
   }
@@ -363,6 +382,9 @@ function createPreBuildStages(
   return stages;
 }
 
+/**
+ *
+ */
 export type ContainerStackProps = {
   deploymentBucket: string;
   containerPort: number;
