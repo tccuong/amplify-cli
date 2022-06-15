@@ -3,7 +3,7 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
-## [4.4.6](https://github.com/aws-amplify/amplify-cli/compare/amplify-util-mock@4.4.5...amplify-util-mock@4.4.6) (2022-06-15)
+## [4.4.6-beta.0](https://github.com/aws-amplify/amplify-cli/compare/amplify-util-mock@4.4.5...amplify-util-mock@4.4.6-beta.0) (2022-06-15)
 
 **Note:** Version bump only for package amplify-util-mock
 
