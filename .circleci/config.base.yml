@@ -625,7 +625,7 @@ jobs:
           path: ~/repo/packages/amplify-e2e-tests/amplify-e2e-reports
     working_directory: ~/repo
 
-  check_node_mem:
+  check_node_memory:
     <<: *linux-e2e-executor
     steps:
       - attach_workspace:
